@@ -1,5 +1,6 @@
 package com.hpdev.picontrol;
 
+import android.animation.Animator;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.RelativeLayout;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -42,6 +46,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private View snackView;
     private int CommandResult=-1;
     private TextToSpeech tts=null;
+    private View speakCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +55,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Res=getResources();
+        speakCard = findViewById(R.id.speakCard);
+        speakCard.setVisibility(View.INVISIBLE);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
@@ -61,6 +68,26 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         snackView=v;
         CheckIP();
         StartVoiceRecognition();
+
+
+
+
+        // get the center for the clipping circle
+        int cx =  speakCard.getRight();
+        int cy = speakCard.getTop();
+
+        // get the final radius for the clipping circle
+        int dx = Math.max(cx, speakCard.getWidth() - cx);
+        int dy = Math.max(cy, speakCard.getHeight() - cy);
+        float finalRadius = (float) Math.hypot(dx, dy);
+
+        // Android native animator
+        Animator animator =
+                ViewAnimationUtils.createCircularReveal(speakCard, cx, cy, 0, finalRadius);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.setDuration(500);
+        speakCard.setVisibility(View.VISIBLE);
+        animator.start();
 
     }
 

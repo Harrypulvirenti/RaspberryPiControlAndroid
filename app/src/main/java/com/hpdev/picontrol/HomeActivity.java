@@ -20,8 +20,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 
 import java.io.BufferedInputStream;
@@ -37,6 +37,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
+import io.codetail.animation.SupportAnimator;
+import io.codetail.animation.ViewAnimationUtils;
 
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -46,7 +48,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private View snackView;
     private int CommandResult=-1;
     private TextToSpeech tts=null;
-    private View speakCard;
+    private View speakLayout;
+    private SupportAnimator animator_reverse;
+    private boolean speakIsOpen=false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +60,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Res=getResources();
-        speakCard = findViewById(R.id.speakCard);
-        speakCard.setVisibility(View.INVISIBLE);
+        speakLayout = findViewById(R.id.speakLayout);
+        speakLayout.setVisibility(View.INVISIBLE);
+        Button hideButton= (Button) findViewById(R.id.hide_button);
+        hideButton.setOnClickListener(this);
+
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
@@ -65,28 +74,66 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        snackView=v;
-        CheckIP();
-        StartVoiceRecognition();
+        if(v.getId()==R.id.fab&&!speakIsOpen){
+        //snackView=v;
+        //CheckIP();
+        //StartVoiceRecognition();
+        showSpeakCard();
+        }
+        if(v.getId()==R.id.hide_button){
+            hideButton();
+        }
 
 
+    }
+
+    private void hideButton() {
+        animator_reverse.addListener(new SupportAnimator.AnimatorListener() {
+
+            @Override
+            public void onAnimationStart() {
+
+            }
+
+            @Override
+            public void onAnimationEnd() {
+                speakLayout.setVisibility(View.INVISIBLE);
+                speakIsOpen=false;
+            }
+
+            @Override
+            public void onAnimationCancel() {
+
+            }
+
+            @Override
+            public void onAnimationRepeat() {
+
+            }
+        });
+        animator_reverse.start();
+    }
 
 
+    private void showSpeakCard() {
         // get the center for the clipping circle
-        int cx =  speakCard.getRight();
-        int cy = speakCard.getTop();
+        int cx =  speakLayout.getRight();
+        int cy = speakLayout.getTop();
 
         // get the final radius for the clipping circle
-        int dx = Math.max(cx, speakCard.getWidth() - cx);
-        int dy = Math.max(cy, speakCard.getHeight() - cy);
+        int dx = speakLayout.getWidth();
+        int dy = speakLayout.getHeight();
         float finalRadius = (float) Math.hypot(dx, dy);
 
         // Android native animator
-        Animator animator =
-                ViewAnimationUtils.createCircularReveal(speakCard, cx, cy, 0, finalRadius);
+
+        SupportAnimator animator =
+                ViewAnimationUtils.createCircularReveal(speakLayout, cx, cy, 0, finalRadius);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
-        animator.setDuration(500);
-        speakCard.setVisibility(View.VISIBLE);
+        animator.setDuration(400);
+        animator_reverse=animator.reverse();
+        speakIsOpen=true;
+        speakLayout.setVisibility(View.VISIBLE);
         animator.start();
 
     }

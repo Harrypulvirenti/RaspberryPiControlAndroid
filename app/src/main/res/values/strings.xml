@@ -16,7 +16,8 @@
 
     </string-array>
     <integer name="noOfMatches">10</integer>
-    <string name="SpeakString">Inserisci un Comando</string>
+    <string name="SpeakString">Inserisci un Comando.</string>
+    <string name="SpeakCommandNotFoundError">Comando non Riconosciuto.</string>
     <string name="RecognizerLanguage">it-IT</string>
     <string name="NoRecognizerActivityLink">https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox</string>
 

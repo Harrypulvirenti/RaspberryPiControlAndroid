@@ -1,28 +1,35 @@
 package com.hpdev.picontrol;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
-import android.widget.RelativeLayout;
+import android.widget.TextView;
+
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -51,6 +58,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private View speakLayout;
     private SupportAnimator animator_reverse;
     private boolean speakIsOpen=false;
+    private SpeechRecognizer speechReco;
+    private boolean isSpeechOnListening=false;
+    private TextView commandResultText;
+    private String speakStringInit;
 
 
     @Override
@@ -60,27 +71,49 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Res=getResources();
+
         speakLayout = findViewById(R.id.speakLayout);
         speakLayout.setVisibility(View.INVISIBLE);
+
         Button hideButton= (Button) findViewById(R.id.hide_button);
         hideButton.setOnClickListener(this);
 
-
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
+
+        speechReco = SpeechRecognizer.createSpeechRecognizer(this);
+        speechReco.setRecognitionListener(new recognizerListener());
+
+        commandResultText=(TextView) findViewById(R.id.commandResultText);
+        speakStringInit=getString(R.string.SpeakString);
+        commandResultText.setText(speakStringInit);
+
     }
 
 
     @Override
     public void onClick(View v) {
-        if(v.getId()==R.id.fab&&!speakIsOpen){
-        //snackView=v;
-        //CheckIP();
-        //StartVoiceRecognition();
-        showSpeakCard();
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO)
+                != PackageManager.PERMISSION_GRANTED&&v.getId()==R.id.fab&&!speakIsOpen) {
+
+
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    0);
+
+        } else if(v.getId()==R.id.fab&&!speakIsOpen){
+            snackView=v;
+            CheckIP();
+            StartVoiceRecognition();
+            showSpeakCard();
+        } else if(v.getId()==R.id.fab&&speakIsOpen&&!isSpeechOnListening){
+            StartVoiceRecognition();
         }
         if(v.getId()==R.id.hide_button){
+            speechReco.stopListening();
             hideButton();
         }
 
@@ -99,6 +132,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             public void onAnimationEnd() {
                 speakLayout.setVisibility(View.INVISIBLE);
                 speakIsOpen=false;
+                commandResultText.setText(speakStringInit);
             }
 
             @Override
@@ -201,14 +235,15 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         try{
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,getClass().getPackage().getName());
-            intent.putExtra(RecognizerIntent.EXTRA_PROMPT,getString(R.string.SpeakString));
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,Res.getInteger(R.integer.noOfMatches));
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE,getString(R.string.RecognizerLanguage));
-            startActivityForResult(intent,VOICE_RECOGNITION_REQUEST_CODE);
+            isSpeechOnListening=true;
+            speechReco.startListening(intent);
         }
         catch(ActivityNotFoundException e)
         {
+            isSpeechOnListening=false;
             Intent browserIntent = new Intent(Intent.ACTION_VIEW,   Uri.parse(getString(R.string.NoRecognizerActivityLink)));
             startActivity(browserIntent);
 
@@ -216,50 +251,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    @Override
-    protected void onActivityResult(int requestCode,int resultCode,Intent data){
-        if (resultCode == RESULT_OK){
-            ArrayList<String> textMatchlist = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-            String[] CommandList=Res.getStringArray(R.array.commandArray);
 
-            if (!textMatchlist.isEmpty()){
-
-                for(int i=0;textMatchlist.size()>i;i++){
-                    String text=textMatchlist.get(i).toLowerCase();
-                    for(int j=0;CommandList.length>j;j++){
-                        if(text.contains(CommandList[j].toLowerCase())){
-                            CommandResult=j;
-                            Log.v("HEREEEEEEEEEEEE",text);
-
-                            break;
-                        }
-                    }
-                    if(CommandResult!=-1){
-                        SendCommand();
-                        break;}
-                }
-            }
-        }
-        else if (resultCode == RecognizerIntent.RESULT_AUDIO_ERROR){
-            showToastMessage("Audio Error");
-
-        }
-        else if ((resultCode == RecognizerIntent.RESULT_CLIENT_ERROR)){
-            showToastMessage("Client Error");
-
-        }
-        else if (resultCode == RecognizerIntent.RESULT_NETWORK_ERROR){
-            showToastMessage("Network Error");
-        }
-        else if (resultCode == RecognizerIntent.RESULT_NO_MATCH){
-            showToastMessage("No Match");
-        }
-        else if (resultCode == RecognizerIntent.RESULT_SERVER_ERROR){
-            showToastMessage("Server Error");
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-
-    }
     void  showToastMessage(String message){
         Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
@@ -378,4 +370,115 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
+    private class recognizerListener implements RecognitionListener{
+
+
+        @Override
+        public void onReadyForSpeech(Bundle params) {
+
+        }
+
+        @Override
+        public void onBeginningOfSpeech() {
+
+        }
+
+        @Override
+        public void onRmsChanged(float rmsdB) {
+
+        }
+
+        @Override
+        public void onBufferReceived(byte[] buffer) {
+
+        }
+
+        @Override
+        public void onEndOfSpeech() {
+
+        }
+
+        @Override
+        public void onError(int error) {
+
+            switch (error){
+                case 6:
+
+                    commandResultText.setText(getString(R.string.SpeakCommandNotFoundError));
+                    break;
+                case 7:
+                    commandResultText.setText(getString(R.string.SpeakCommandNotFoundError));
+                    break;
+                default:
+
+                    Log.d("hereeeeeeeeeee",  "error " +  error);
+                    break;
+            }
+            isSpeechOnListening=false;
+        }
+
+        @Override
+        public void onResults(Bundle results) {
+
+            String[] CommandList=Res.getStringArray(R.array.commandArray);
+
+            ArrayList<String> textMatchlist = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            CommandResult=-1;
+
+
+            if (!textMatchlist.isEmpty()){
+
+                for(int i=0;textMatchlist.size()>i;i++){
+                    String text=textMatchlist.get(i).toLowerCase();
+                    for(int j=0;CommandList.length>j;j++){
+                        if(text.contains(CommandList[j].toLowerCase())){
+                            CommandResult=j;
+                            break;
+                        }
+                    }
+                    if(CommandResult!=-1){
+                        SendCommand();
+                        isSpeechOnListening=false;
+                        commandResultText.setText(CommandList[CommandResult]);
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                hideButton();
+                            }
+                        }, 1500);
+                        break;}
+                }
+            } else{
+                commandResultText.setText(getString(R.string.SpeakCommandNotFoundError));
+                isSpeechOnListening=false;
+
+            }
+
+            if(CommandResult==-1){
+                commandResultText.setText(getString(R.string.SpeakCommandNotFoundError));
+                isSpeechOnListening=false;
+                }
+
+           // speakCommand.setText("results: "+String.valueOf(data.size()));
+        }
+
+        @Override
+        public void onPartialResults(Bundle partialResults) {
+
+        }
+
+        @Override
+        public void onEvent(int eventType, Bundle params) {
+
+        }
+    }
+
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        speechReco.destroy();
+    }
 }

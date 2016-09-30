@@ -5,4 +5,5 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="toolbar">56dp</dimen>
     <dimen name="fab_margin_top">25dp</dimen>
+    <dimen name="speakDimension">200dp</dimen>
 </resources>

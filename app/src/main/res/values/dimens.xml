@@ -6,4 +6,6 @@
     <dimen name="toolbar">56dp</dimen>
     <dimen name="fab_margin_top">25dp</dimen>
     <dimen name="speakDimension">200dp</dimen>
+    <dimen name="icon_margin">72dp</dimen>
+    <dimen name="fab_Dimension">69dp</dimen>
 </resources>

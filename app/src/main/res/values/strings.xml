@@ -22,4 +22,25 @@
     <string name="NoRecognizerActivityLink">https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox</string>
 
     <integer name="PortNumber">8888</integer>
+
+
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="prompt_name">Nome</string>
+    <string name="prompt_password_second">Reinserisci la Password</string>
+    <string name="prompt_surname">Cognome</string>
+
+    <string name="register"><u>Non sei ancora registrato?</u></string>
+    <string name="autologin">Ricorda dati di accesso.</string>
+    <string name="title_activity_login">PiControl</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="title_activity_register">Registrazione PiControl</string>
 </resources>

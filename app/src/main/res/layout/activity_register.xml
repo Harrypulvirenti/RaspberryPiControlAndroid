@@ -25,12 +25,24 @@
         android:id="@+id/login_form"
         android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="400dp">
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/icon_margin">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorPrimary"
+            android:textAlignment="center"
+            android:layout_marginTop="10dp"
+
+            android:id="@+id/registerError" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/inputaddName"
+            android:layout_below="@id/registerError"
             android:layout_gravity="center">
 
             <EditText

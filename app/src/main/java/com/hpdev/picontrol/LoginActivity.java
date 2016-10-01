@@ -3,6 +3,7 @@ package com.hpdev.picontrol;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -38,11 +39,13 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
     private UserLoginTask mAuthTask = null;
 
     // UI references.
-    private EditText mEmailView;
-    private EditText mPasswordView;
+    private EditText etEmail;
+    private EditText etPassword;
     private View mProgressView;
     private View mLoginFormView;
     private TextView registerButton;
+    static final int REGISTER_REQUEST = 12;
+    private final String KEY_EMAIL="email";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +55,11 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Set up the login form.
-        mEmailView = (EditText) findViewById(R.id.email);
+        etEmail = (EditText) findViewById(R.id.email);
 
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        etPassword = (EditText) findViewById(R.id.password);
+        etPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
@@ -84,31 +87,31 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         }
 
         // Reset errors.
-        mEmailView.setError(null);
-        mPasswordView.setError(null);
+        etEmail.setError(null);
+        etPassword.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
-        String password = mPasswordView.getText().toString();
+        String email = etEmail.getText().toString();
+        String password = etPassword.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
         if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+            etPassword.setError(getString(R.string.error_invalid_password));
+            focusView = etPassword;
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+            etEmail.setError(getString(R.string.error_field_required));
+            focusView = etEmail;
             cancel = true;
         } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
+            etEmail.setError(getString(R.string.error_invalid_email));
+            focusView = etEmail;
             cancel = true;
         }
 
@@ -182,12 +185,21 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
         }
         if(v.getId()==R.id.registerButton){
             Intent intent=new Intent(LoginActivity.this,RegisterActivity.class);
-            startActivityForResult(intent,0);
+            startActivityForResult(intent,REGISTER_REQUEST);
 
         }
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode==REGISTER_REQUEST&&resultCode== Activity.RESULT_OK){
+           etEmail.setText(data.getStringExtra(KEY_EMAIL));
+
+        }
+    }
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -244,8 +256,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener{
             if (success) {
                 finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                etPassword.setError(getString(R.string.error_incorrect_password));
+                etPassword.requestFocus();
             }
         }
 

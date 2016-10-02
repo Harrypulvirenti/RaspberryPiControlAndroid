@@ -2,14 +2,10 @@ package com.hpdev.picontrol;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TextInputLayout;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -111,7 +107,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                         if(Integer.parseInt(response)==SERVER_SUCCESS){
                             closeActivity();
                         }else{
-                            showToastMessage(getString(R.string.registration_error));
+                            showToastMessage(getString(R.string.server_error));
                         }
 
                     }
@@ -119,7 +115,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        showToastMessage(getString(R.string.registration_error));
+                        showToastMessage(getString(R.string.server_error));
                     }
                 }){
             @Override
@@ -237,8 +233,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
         }
 
         if(v.getId()==R.id.addEmail&&!hasFocus){
+            String k=etEmail.getText().toString();
+            String myString=k.replaceAll(" ", "");
 
-            String myString=etEmail.getText().toString();
             if (myString.length()==0) {
                 errorText.setText(getString(R.string.error_field_required));
                 error=true;
@@ -248,6 +245,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                 error=true;
             } else{
                 errorText.setText("");
+                etEmail.setText(myString);
                 error=false;
                 requestCheckEmail(myString);
             }}

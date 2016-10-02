@@ -31,7 +31,7 @@
     <string name="prompt_surname">Cognome</string>
 
     <string name="register"><u>Non sei ancora registrato?</u></string>
-    <string name="autologin">Ricorda dati di accesso.</string>
+    <string name="autologin">Accedi Automaticamente.</string>
     <string name="title_activity_login">PiControl</string>
     <string name="action_sign_in">Sign in or register</string>
     <string name="action_sign_in_short">Sign in</string>
@@ -43,6 +43,13 @@
 
     <string name="title_activity_register">Registrazione PiControl</string>
 
-    <string name="registration_error">Errore Server.\nRiprovare più tardi.</string>
+    <string name="server_error">Errore Server.\nRiprovare più tardi.</string>
     <string name="registration_success">Registrazione Avvenuta con Successo.</string>
+
+    <string name="login_email_error">Utente Non Registrato.</string>
+    <string name="login_password_error">Password Errata.</string>
+
+    <string name="spKeyLoginEmail">LOGIN_EMAIL</string>
+    <string name="spKeyLoginPassword">LOGIN_PASSWORD</string>
+    <string name="spKeyAutoLogin">AUTO_LOGIN</string>
 </resources>

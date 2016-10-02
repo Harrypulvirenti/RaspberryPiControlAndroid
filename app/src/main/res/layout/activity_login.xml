@@ -20,32 +20,44 @@
     </android.support.design.widget.AppBarLayout>
 
 
-    <!-- Login progress -->
-    <ProgressBar
-        android:id="@+id/login_progress"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+
 
 
     <RelativeLayout
         android:id="@+id/login_form"
         android:layout_gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="200dp">
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            app:srcCompat="@drawable/ic_app_big"
+            android:layout_centerInParent="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/icon_margin"
+            android:id="@+id/imageView" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/colorPrimary"
+            android:textAlignment="center"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/imageView"
+            android:id="@+id/loginError" />
 
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/inputEmail"
+            android:layout_below="@id/loginError"
             android:layout_gravity="center">
 
             <EditText
-                android:id="@+id/email"
+                android:id="@+id/loginEmail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_email"
@@ -62,7 +74,7 @@
             android:layout_below="@id/inputEmail">
 
             <EditText
-                android:id="@+id/password"
+                android:id="@+id/loginPassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_password"
@@ -102,7 +114,15 @@
 
     </RelativeLayout>
 
-
+    <!-- Login progress -->
+    <ProgressBar
+        android:id="@+id/login_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="@dimen/fab_Dimension"
+        android:layout_height="@dimen/fab_Dimension"
+        android:layout_margin="16dp"
+        android:layout_gravity="center|bottom"
+        android:visibility="gone" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/loginButton"
@@ -113,13 +133,7 @@
 
         android:src="@drawable/ic_key" />
 
-    <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        app:srcCompat="@drawable/ic_app_big"
-        android:layout_gravity="center|top"
-        android:layout_marginTop="@dimen/icon_margin"
-        android:id="@+id/imageView" />
+
 
 
 </android.support.design.widget.CoordinatorLayout>

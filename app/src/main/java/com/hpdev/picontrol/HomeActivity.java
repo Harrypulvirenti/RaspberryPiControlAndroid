@@ -50,7 +50,6 @@ import io.codetail.animation.ViewAnimationUtils;
 public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
 
     private String IP;
-    private  static  final int VOICE_RECOGNITION_REQUEST_CODE = 1001;
     private Resources Res;
     private View snackView;
     private int CommandResult=-1;
@@ -62,6 +61,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private boolean isSpeechOnListening=false;
     private TextView commandResultText;
     private String speakStringInit;
+    private final String KEY_USERID="USER_ID";
 
 
     @Override

@@ -18,18 +18,35 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -42,12 +59,14 @@ import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener {
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
 
     private String IP;
     private Resources Res;
@@ -62,6 +81,20 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private TextView commandResultText;
     private String speakStringInit;
     private final String KEY_USERID="USER_ID";
+    private NavigationView navigationView;
+    private DrawerLayout drawerLayout;
+    private TextView drawerEmail=null;
+    private TextView drawerUsername;
+    private int userID;
+    private final String USER_DATA_URL="http://harrydev.altervista.org/Tesi/getUserData.php";
+    private ArrayList<Pi> piList=null;
+    private final String KEY_PI_ID="pi_id";
+    private final String KEY_PI_NAME="pi_name";
+    private final String KEY_PI_IP="pi_ip";
+    private final String KEY_PI_LAST_UPDATE="pi_last_update";
+    private final String KEY_USER_NAME="name";
+    private final String KEY_USER_SURNAME="surname";
+    private final String KEY_USER_EMAIL="email";
 
 
     @Override
@@ -70,6 +103,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        userID=getIntent().getIntExtra(KEY_USERID,0);
         Res=getResources();
 
         speakLayout = findViewById(R.id.speakLayout);
@@ -88,6 +123,107 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         speakStringInit=getString(R.string.SpeakString);
         commandResultText.setText(speakStringInit);
 
+        navigationView = (NavigationView) findViewById(R.id.navigation_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        View headerView = navigationView.inflateHeaderView(R.layout.header);
+        drawerEmail=(TextView)headerView.findViewById(R.id.drawerEmail);
+        drawerUsername=(TextView)headerView.findViewById(R.id.drawerUsername);
+        piList=new ArrayList<Pi>();
+        requestUserData(userID);
+
+
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
+        ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.openDrawer, R.string.closeDrawer){
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                // Code here will be triggered once the drawer closes as we dont want anything to happen so we leave this blank
+                super.onDrawerClosed(drawerView);
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Code here will be triggered once the drawer open as we dont want anything to happen so we leave this blank
+
+                super.onDrawerOpened(drawerView);
+            }
+        };
+
+        //Setting the actionbarToggle to drawer layout
+        drawerLayout.setDrawerListener(actionBarDrawerToggle);
+
+        //calling sync state is necessay or else your hamburger icon wont show up
+        actionBarDrawerToggle.syncState();
+
+    }
+
+    private void requestUserData(final int id) {
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, USER_DATA_URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        JSONArray jsArray=null;
+                        JSONObject obj=null;
+                        String username=null;
+                        String email=null;
+                        try {
+                            jsArray=new JSONArray(response);
+                            obj=null;
+                            username=null;
+                            email=null;
+                            String piID=null;
+                            String piName=null;
+                            String piIP=null;
+                            String piLastUpdate=null;
+                            for(int i=0;i<jsArray.length();i++){
+                                obj=jsArray.getJSONObject(i);
+                                username=obj.getString(KEY_USER_NAME)+" "+obj.getString(KEY_USER_SURNAME);
+                                email=obj.getString(KEY_USER_EMAIL);
+                                piID=obj.getString(KEY_PI_ID);
+                                piName=obj.getString(KEY_PI_NAME);
+                                piIP=obj.getString(KEY_PI_IP);
+                                piLastUpdate=obj.getString(KEY_PI_LAST_UPDATE);
+                                addPi(new Pi(piID,piName,piIP,piLastUpdate));
+                                updateDrawerUser(username,email);
+                            }
+                        } catch (JSONException e) {
+                            updateDrawerUser(username,email);
+                        }
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                        showToastMessage(getString(R.string.server_error));
+                    }
+                }){
+            @Override
+            protected Map<String,String> getParams(){
+                Map<String,String> params = new HashMap<String, String>();
+                params.put(KEY_USERID, String.valueOf(id));
+                return params;
+            }
+
+        };
+
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+
+    }
+
+    private void updateDrawerUser(String username, String email) {
+
+        Log.v("HEREeeeeeeeeeeeee",username+" "+email);
+        drawerUsername.setText(username);
+        drawerEmail.setText(email);
+
+    }
+
+    private void addPi(Pi pi) {
+        piList.add(pi);
     }
 
 
@@ -201,6 +337,44 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+
+        //Checking if the item is in checked state or not, if not make it in checked state
+        if(item.isChecked()) item.setChecked(false);
+        else item.setChecked(true);
+
+        //Closing drawer on item click
+        drawerLayout.closeDrawers();
+
+        //Check to see which item was being clicked and perform appropriate action
+        switch (item.getItemId()){
+
+
+            //Replacing the main content with ContentFragment Which is our Inbox View;
+            case R.id.inbox:
+                Toast.makeText(getApplicationContext(),"Inbox Selected",Toast.LENGTH_SHORT).show();
+                ContentFragment fragment = new ContentFragment();
+                android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.piList_Frame,fragment);
+                fragmentTransaction.commit();
+                return true;
+
+            // For rest of the options we just show a toast on click
+
+            case R.id.starred:
+                Toast.makeText(getApplicationContext(),"Stared Selected",Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.trash:
+                Toast.makeText(getApplicationContext(),"Trash Selected",Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                Toast.makeText(getApplicationContext(),"Somethings Wrong",Toast.LENGTH_SHORT).show();
+                return true;
+
+        }
     }
 
 
@@ -482,5 +656,53 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         speechReco.destroy();
+    }
+
+
+    private class Pi {
+
+        private String piID;
+        private String piName;
+        private String piIP;
+        private String piLastUpdate;
+
+        public Pi(String piID, String piName, String piIP, String piLastUpdate) {
+            this.piID = piID;
+            this.piName = piName;
+            this.piIP = piIP;
+            this.piLastUpdate = piLastUpdate;
+        }
+
+        public String getPiID() {
+            return piID;
+        }
+
+        public String getPiName() {
+            return piName;
+        }
+
+        public String getPiIP() {
+            return piIP;
+        }
+
+        public String getPiLastUpdate() {
+            return piLastUpdate;
+        }
+
+        public void setPiID(String piID) {
+            this.piID = piID;
+        }
+
+        public void setPiName(String piName) {
+            this.piName = piName;
+        }
+
+        public void setPiIP(String piIP) {
+            this.piIP = piIP;
+        }
+
+        public void setPiLastUpdate(String piLastUpdate) {
+            this.piLastUpdate = piLastUpdate;
+        }
     }
 }

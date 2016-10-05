@@ -56,4 +56,7 @@
 
     <string name="closeDrawer">Navigation View</string>
     <string name="openDrawer">Navigation View Closed</string>
+    <string name="drawerSettings">Impostazioni</string>
+    <string name="drawerLogout">Logout</string>
+
 </resources>

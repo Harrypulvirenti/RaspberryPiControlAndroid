@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -37,7 +38,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
 
     // UI references.
     private EditText etEmail;
-    private EditText etPassword;
+    private EditText  etPassword;
     private View mProgressView;
     private TextView registerButton;
     private CheckBox cbAutologin;
@@ -62,8 +63,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
         setSupportActionBar(toolbar);
         // Set up the login form.
 
-        etEmail = (EditText) findViewById(R.id.loginEmail);
-        etPassword = (EditText) findViewById(R.id.loginPassword);
+        etEmail = (EditText ) findViewById(R.id.loginEmail);
+        etPassword = (EditText ) findViewById(R.id.loginPassword);
 
 
         mEmailSignInButton = (FloatingActionButton) findViewById(R.id.loginButton);
@@ -97,6 +98,8 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
             etEmail.setText(email);
             cbAutologin.setChecked(false);
         }
+
+
     }
 
 

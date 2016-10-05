@@ -43,5 +43,4 @@
         android:layout_alignStart="@id/drawerUsername" />
 
 
-
 </RelativeLayout>

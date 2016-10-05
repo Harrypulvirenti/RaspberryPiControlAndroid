@@ -1,27 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
-
-        <item
-            android:id="@+id/inbox"
-            android:checked="false"
-            android:icon="@drawable/ic_inbox_black"
-            android:title="@string/error_email_used" />
-
-        <item
-            android:id="@+id/starred"
-            android:checked="false"
-            android:icon="@drawable/ic_star_black"
-            android:title="@string/app_name" />
-
-
-        <item
-            android:id="@+id/trash"
-            android:checked="false"
-            android:icon="@drawable/ic_delete_black"
-            android:title="@string/defaultIP" />
-
-
-    </group>
 </menu>

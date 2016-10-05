@@ -22,11 +22,14 @@
     </android.support.design.widget.AppBarLayout>
 
     <RelativeLayout
-        android:id="@+id/login_form"
+        android:id="@+id/register_form"
         android:layout_gravity="center"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/icon_margin">
+        android:layout_marginTop="@dimen/icon_margin"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true"
+        >
 
         <TextView
             android:layout_width="match_parent"

@@ -1,18 +1,15 @@
 package com.hpdev.picontrol;
 
 import android.Manifest;
-import android.animation.Animator;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.media.AudioAttributes;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -29,12 +26,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
 import com.android.volley.Request;
@@ -95,6 +92,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private final String KEY_USER_NAME="name";
     private final String KEY_USER_SURNAME="surname";
     private final String KEY_USER_EMAIL="email";
+    private final int SETTING_ID=1000;
+    private final int LOGOUT_ID=2000;
 
 
     @Override
@@ -154,7 +153,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         //calling sync state is necessay or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
-
     }
 
     private void requestUserData(final int id) {
@@ -185,10 +183,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                                 piIP=obj.getString(KEY_PI_IP);
                                 piLastUpdate=obj.getString(KEY_PI_LAST_UPDATE);
                                 addPi(new Pi(piID,piName,piIP,piLastUpdate));
-                                updateDrawerUser(username,email);
                             }
                         } catch (JSONException e) {
-                            updateDrawerUser(username,email);
+
+                        }
+
+                        updateDrawer(username,email);
+                        if(piList.size()>0){
+                            selectFragment(0);
                         }
 
                     }
@@ -214,11 +216,26 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void updateDrawerUser(String username, String email) {
-
-        Log.v("HEREeeeeeeeeeeeee",username+" "+email);
+    private void updateDrawer(String username, String email) {
+        Menu drawerMenu= navigationView.getMenu();
         drawerUsername.setText(username);
         drawerEmail.setText(email);
+        MenuItem mItem= null;
+        int i=0;
+
+        if(piList.size()>0){
+
+            for (;i<piList.size();i++){
+                mItem=drawerMenu.add(Menu.NONE,i,i,piList.get(i).getPiName());
+                mItem.setIcon(R.drawable.ic_drawer_rasp);
+
+            }}
+
+        mItem=drawerMenu.add(Menu.NONE,SETTING_ID,i,getString(R.string.drawerSettings));
+        mItem.setIcon(R.drawable.ic_settings);
+        i++;
+        mItem=drawerMenu.add(Menu.NONE,LOGOUT_ID,i,getString(R.string.drawerLogout));
+        mItem.setIcon(R.drawable.ic_logout);
 
     }
 
@@ -342,39 +359,37 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        //Checking if the item is in checked state or not, if not make it in checked state
-        if(item.isChecked()) item.setChecked(false);
-        else item.setChecked(true);
-
         //Closing drawer on item click
         drawerLayout.closeDrawers();
 
-        //Check to see which item was being clicked and perform appropriate action
+
         switch (item.getItemId()){
+            case SETTING_ID:
 
+                return true;
+            case LOGOUT_ID:
 
-            //Replacing the main content with ContentFragment Which is our Inbox View;
-            case R.id.inbox:
-                Toast.makeText(getApplicationContext(),"Inbox Selected",Toast.LENGTH_SHORT).show();
-                ContentFragment fragment = new ContentFragment();
-                android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.piList_Frame,fragment);
-                fragmentTransaction.commit();
                 return true;
 
-            // For rest of the options we just show a toast on click
-
-            case R.id.starred:
-                Toast.makeText(getApplicationContext(),"Stared Selected",Toast.LENGTH_SHORT).show();
-                return true;
-            case R.id.trash:
-                Toast.makeText(getApplicationContext(),"Trash Selected",Toast.LENGTH_SHORT).show();
-                return true;
             default:
-                Toast.makeText(getApplicationContext(),"Somethings Wrong",Toast.LENGTH_SHORT).show();
+                selectFragment(item.getItemId());
                 return true;
-
         }
+
+
+    }
+
+
+    private void selectFragment(int selected){
+
+        PiRoomFragment fragment = new PiRoomFragment();
+        Bundle bnd=new Bundle();
+        bnd.putString(PiRoomFragment.KEY_PI_NAME,piList.get(selected).getPiName());
+        bnd.putString(PiRoomFragment.KEY_PI_IP,piList.get(selected).getPiIP());
+        fragment.setArguments(bnd);
+        android.support.v4.app.FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.piList_Frame,fragment);
+        fragmentTransaction.commit();
     }
 
 
@@ -659,50 +674,4 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    private class Pi {
-
-        private String piID;
-        private String piName;
-        private String piIP;
-        private String piLastUpdate;
-
-        public Pi(String piID, String piName, String piIP, String piLastUpdate) {
-            this.piID = piID;
-            this.piName = piName;
-            this.piIP = piIP;
-            this.piLastUpdate = piLastUpdate;
-        }
-
-        public String getPiID() {
-            return piID;
-        }
-
-        public String getPiName() {
-            return piName;
-        }
-
-        public String getPiIP() {
-            return piIP;
-        }
-
-        public String getPiLastUpdate() {
-            return piLastUpdate;
-        }
-
-        public void setPiID(String piID) {
-            this.piID = piID;
-        }
-
-        public void setPiName(String piName) {
-            this.piName = piName;
-        }
-
-        public void setPiIP(String piIP) {
-            this.piIP = piIP;
-        }
-
-        public void setPiLastUpdate(String piLastUpdate) {
-            this.piLastUpdate = piLastUpdate;
-        }
-    }
 }

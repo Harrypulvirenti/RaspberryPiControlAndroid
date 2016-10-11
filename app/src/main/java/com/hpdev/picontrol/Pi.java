@@ -1,21 +1,38 @@
 package com.hpdev.picontrol;
 
+import android.annotation.SuppressLint;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.util.ArrayList;
+
 /**
  * Created by harry on 04/10/2016.
  */
 
-public class Pi {
+@SuppressLint("ParcelCreator")
+public class Pi implements Parcelable {
 
     private String piID;
     private String piName;
     private String piIP;
     private String piLastUpdate;
+    private ArrayList<Room> roomList;
 
     public Pi(String piID, String piName, String piIP, String piLastUpdate) {
         this.piID = piID;
         this.piName = piName;
         this.piIP = piIP;
         this.piLastUpdate = piLastUpdate;
+        roomList=new ArrayList<Room>();
+    }
+
+    public void addRoom(Room room){
+        roomList.add(room);
+    }
+
+    public ArrayList<Room> getRoomList(){
+        return roomList;
     }
 
     public String getPiID() {
@@ -49,5 +66,22 @@ public class Pi {
     public void setPiLastUpdate(String piLastUpdate) {
         this.piLastUpdate = piLastUpdate;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        /*
+        dest.writeString(this.piID);
+        dest.writeString(this.piName);
+        dest.writeString(this.piIP);
+        dest.writeString(this.piLastUpdate);
+        dest.writeList(this.roomList);*/
+
+    }
+
 
 }

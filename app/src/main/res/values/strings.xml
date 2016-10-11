@@ -5,7 +5,7 @@
     <string name="defaultIP">0.0.0.0</string>
     <string name="spIPKey">spIPKey</string>
     <string name="spIPValidity">spIPValidity</string>
-    <integer name="IPValidity">900000</integer>
+    <integer name="IPValidity">600000</integer>
     <string name="getIPURL">http://harrydev.altervista.org/Tesi/getIP.php</string>
 
     <string-array name="commandArray">
@@ -58,5 +58,21 @@
     <string name="openDrawer">Navigation View Closed</string>
     <string name="drawerSettings">Impostazioni</string>
     <string name="drawerLogout">Logout</string>
+    <string name="drawerAddPi">Aggiungi Raspberry</string>
+    <string name="title_activity_add_pi">Aggiungi un Raspberry</string>
+
+    <string name="text_addPi_1">Avvia il Jar di PiControl su Raspberry Pi\ntramite il seguente comando:\n\n\"sudo java -jar PiControl.jar LOGIN_KEY\"\n\nLa tua LOGIN_KEY:</string>
+    <string name="text_addPi_2">Una volta avviato il Jar clicca sul pulsante di conferma per l\'accoppiamento dei dispositivi.</string>
+    <string name="addPi_Error">Errore nella connessione col Raspberry.\nRiprovare.</string>
+    <string name="prompt_piName">Nome Raspberry</string>
+    <string name="add_pi_success">Raspberry Accoppiato con Successo.</string>
+
+    <string name="empty_room">Non ci sono Stanze Settate nel Raspberry Pi.</string>
+    <string name="title_activity_add_room">Aggiungi Stanza</string>
+    <string name="textAddRoom">Aggiungi una stanza da controllare con il tuo Raspberry Pi.</string>
+    <string name="prompt_RoomName">Nome Stanza</string>
+    <string name="noNameRoom">Aggiungere un nome alla stanza per proseguire.</string>
+    <string name="roomAdded">Stanza aggiunta con successo.</string>
+    <string name="addRoomError">Problemi di comunicazione col Server.\nRiprovare</string>
 
 </resources>

@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
     private boolean error=false;
     private final String KEY_EMAIL="email";
     private final String KEY_PASSWORD="password";
-    private final String KEY_USERID="USER_ID";
+    private final String KEY_USERID="user_id";
     private final int LOGIN_ERROR_EMAIL=-250;
     private final int LOGIN_ERROR_PASSWORD=-350;
     private View snackView;
@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
         errorText= (TextView) findViewById(R.id.loginError);
         cbAutologin= (CheckBox) findViewById(R.id.autologin);
 
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name),Context.MODE_PRIVATE);
 
         final String email=sharedPref.getString(getString(R.string.spKeyLoginEmail), "");
         final String password=sharedPref.getString(getString(R.string.spKeyLoginPassword), "");
@@ -281,7 +281,7 @@ public class LoginActivity extends AppCompatActivity implements OnClickListener,
     }
 
     private void addSharedPref(String email, String password) {
-        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.app_name),Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         if(password!=null){
             editor.putString(getString(R.string.spKeyLoginEmail), email);

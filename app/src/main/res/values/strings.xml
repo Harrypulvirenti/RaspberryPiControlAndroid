@@ -74,5 +74,6 @@
     <string name="noNameRoom">Aggiungere un nome alla stanza per proseguire.</string>
     <string name="roomAdded">Stanza aggiunta con successo.</string>
     <string name="addRoomError">Problemi di comunicazione col Server.\nRiprovare</string>
+    <string name="raspberryPkg">com.hpdev</string>
 
 </resources>

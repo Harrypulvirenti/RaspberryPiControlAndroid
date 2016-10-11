@@ -16,7 +16,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Admin on 04-06-2015.
@@ -34,6 +38,7 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private FloatingActionButton fabAddRoom;
     private final static int REQUEST_ADD_ROOM=21423;
     private final static String KEY_ROOM="myRoom";
+    private XMLWrapper fileWrapper=null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -52,6 +57,25 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
             myPi=extra.getParcelable(KEY_PI);
 
+        }
+
+
+        try {
+            String xml= (String) new RaspberryTCPClient(myPi.getPiIP(),getResources(),RaspberryTCPClient.TYPE_UPDATE_REQUEST).execute().get();
+            xml=xml.replaceAll(getString(R.string.raspberryPkg),getActivity().getPackageName());
+            XStream xstream = new XStream(new DomDriver());
+
+            fileWrapper=(XMLWrapper)xstream.fromXML(xml);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        if(fileWrapper!=null){
+            ArrayList<XMLRoom> room=fileWrapper.getXMLRoomList();
+            for(int i=0;i<room.size();i++)
+                myPi.addRoom(new Room(room.get(i).getName()));
         }
 
 

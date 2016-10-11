@@ -2,6 +2,7 @@ package com.hpdev.picontrol;
 
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -29,8 +30,8 @@ public class RaspberryTCPClient extends AsyncTask {
     private String RequestType;
     private String roomName;
 
-    public RaspberryTCPClient(String pi, Resources res, String type_request) {
-        this.pi_ip=pi;
+    public RaspberryTCPClient(String pi_ip, Resources res, String type_request) {
+        this.pi_ip=pi_ip;
         Res=res;
         RequestType=type_request;
     }
@@ -43,7 +44,7 @@ public class RaspberryTCPClient extends AsyncTask {
     }
 
     @Override
-    protected Integer doInBackground(Object[] params) {
+    protected Object doInBackground(Object[] params) {
         String serverResp = null;
         BufferedReader inFromUser = new BufferedReader( new InputStreamReader(System.in));
         Socket clientSocket = null;
@@ -70,6 +71,29 @@ public class RaspberryTCPClient extends AsyncTask {
                         return OPERATION_FAIL;
                     }
                 }
+
+            }
+
+            if(RequestType.equals(TYPE_UPDATE_REQUEST)){
+
+                outToServer.writeBytes(TYPE_UPDATE_REQUEST+"\n");
+                serverResp = inFromServer.readLine();
+                String xml="";
+                if(serverResp.equals(WAIT_MESSAGE)){
+
+                    while (true){
+                        serverResp = inFromServer.readLine();
+                        if(!serverResp.equals(DONE_MESSAGE)){
+                            xml+=serverResp+"\n";
+                        }else{
+                            xml = xml.substring(0, xml.length()-1);
+                            break;
+                        }
+
+                    }
+                }
+                clientSocket.close();
+                return xml;
 
             }
 

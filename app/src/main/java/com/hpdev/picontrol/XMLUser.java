@@ -7,6 +7,12 @@ import java.util.ArrayList;
  */
 public class XMLUser {
 
+    //UPDATE BOTH TYPE HERE AND IN STRING.XML IN THE ARRAY WITH THE SAME ORDER
+
+    public final static int USER_TYPE_RELAY=0;
+    public final static int USER_TYPE_SENSOR_DH11=1;
+
+
 
     private ArrayList<XMLPin> PinList;
     private String UserName;

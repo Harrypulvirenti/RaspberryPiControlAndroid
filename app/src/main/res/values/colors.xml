@@ -9,5 +9,6 @@
     <color name="divider">#BDBDBD</color>
     <color name="hide_button">#80dddddd</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 
 </resources>

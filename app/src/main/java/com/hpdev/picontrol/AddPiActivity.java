@@ -71,7 +71,7 @@ public class AddPiActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void isPiOnline() {
-        String myString=etAddPi.getText().toString();
+        String myString=etAddPi.getText().toString().trim();
 
         if(myString.length()>0){
             piName = myString.substring(0,1).toUpperCase() + myString.substring(1);}

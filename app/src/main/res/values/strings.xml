@@ -71,6 +71,7 @@
     <string name="title_activity_add_room">Aggiungi Stanza</string>
     <string name="textAddRoom">Aggiungi una stanza da controllare con il tuo Raspberry Pi.</string>
     <string name="prompt_RoomName">Nome Stanza</string>
+    <string name="roomNamePresent">Nome Stanza già Inserito</string>
     <string name="noNameRoom">Aggiungere un nome alla stanza per proseguire.</string>
     <string name="roomAdded">Stanza aggiunta con successo.</string>
     <string name="addRoomError">Problemi di comunicazione col Server.\nRiprovare</string>
@@ -88,7 +89,20 @@
         <item>Piscina</item>
         <item>Giardino</item>
     </string-array>
-    <string name="title_activity_view_room">ViewRoomActivity</string>
+    <string name="title_activity_view_room">Stanza</string>
+    <string name="title_activity_add_user">Aggiungi Add On</string>
+    <string name="prompt_addUserName">Nome Add On</string>
+    <string name="textAddUser">Aggiungi Funzionalità al tuo Raspberry Pi.</string>
+    <string name="textUserType">Add On Disponibili</string>
+
+    <string-array name="userTypeName">
+        <item>Relay</item>
+        <item>Sensore di Temperatura DH11</item>
+    </string-array>
+
+    <string name="noUserName">Aggiungere un nome all\'Add On per Proseguire.</string>
+    <string name="UserAdded">Add On aggiunto con successo.</string>
+    <string name="userNamePresent">Nome Add On già in uso per questa stanza.</string>
 
 
 </resources>

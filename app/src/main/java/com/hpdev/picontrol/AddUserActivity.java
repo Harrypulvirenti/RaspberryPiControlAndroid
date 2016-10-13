@@ -1,13 +1,9 @@
 package com.hpdev.picontrol;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +12,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,58 +22,90 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
+public class AddUserActivity extends AppCompatActivity implements View.OnClickListener{
 
-public class AddRoomActivity extends AppCompatActivity implements View.OnClickListener {
-
-    private View snackView;
-    private FloatingActionButton fabDoneAddRoom;
-    private EditText etRoomName;
-    private String roomName = null;
+    private FloatingActionButton fabDoneAddOn;
+    private EditText etUserName;
     public final static String KEY_PI_IP = "MyPi_IP";
-    private final static String KEY_ROOM = "myRoom";
-    private final static String KEY_ROOM_TYPE = "myRoom_Type";
-    private final static String KEY_ROOM_LIST="myRoom_List";
-
-    private RecyclerView typeRecyclerView;
-    private GridLayoutManager layoutManager;
-    private AddRoomActivity.TypeAdapter adapter;
-
-
+    private final static String KEY_USER_LIST="myUser_List";
+    private final static String KEY_ROOM="myRoom";
     private String myPi;
-    private String[] roomNameList;
+    private View snackView;
+
+    private RecyclerView typeUserRecyclerView;
+    private GridLayoutManager layoutManager;
+    private  TypeUserAdapter adapter;
+    private String UserName="";
+    private String roomName;
+    private String[] userList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_room);
+        setContentView(R.layout.activity_add_user);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        fabDoneAddRoom = (FloatingActionButton) findViewById(R.id.doneAddRoom);
-        fabDoneAddRoom.setOnClickListener(this);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        etRoomName = (EditText) findViewById(R.id.addRoomName);
+
+
+        fabDoneAddOn = (FloatingActionButton) findViewById(R.id.fabDoneAddOn);
+        fabDoneAddOn.setOnClickListener(this);
+
+
+        etUserName = (EditText) findViewById(R.id.addUserName);
+        roomName=getIntent().getStringExtra(KEY_ROOM);
         myPi = getIntent().getStringExtra(KEY_PI_IP);
-        roomNameList=getIntent().getStringArrayExtra(KEY_ROOM_LIST);
+        userList=getIntent().getStringArrayExtra(KEY_USER_LIST);
+
 
         layoutManager = new GridLayoutManager(this, 2);
 
 
-        typeRecyclerView = (RecyclerView) findViewById(R.id.recyclerTypeRoom);
-        typeRecyclerView.setHasFixedSize(true);
+        typeUserRecyclerView = (RecyclerView) findViewById(R.id.recyclerTypeUser);
+        typeUserRecyclerView.setHasFixedSize(true);
 
-        typeRecyclerView.setLayoutManager(layoutManager);
+        typeUserRecyclerView.setLayoutManager(layoutManager);
 
-        typeRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
-        typeRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        typeUserRecyclerView.addItemDecoration(new GridSpacingItemDecoration(2, dpToPx(10), true));
+        typeUserRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // specify an adapter (see also next example)
-        adapter = new TypeAdapter(this,prepareAdapterData(getResources().getStringArray(R.array.roomTypeName)));
-        typeRecyclerView.setAdapter(adapter);
+        adapter = new TypeUserAdapter(this,prepareAdapterData(getResources().getStringArray(R.array.userTypeName)));
+        typeUserRecyclerView.setAdapter(adapter);
 
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        if (v.getId() == R.id.fabDoneAddOn) {
+            snackView = v;
+            String myString = etUserName.getText().toString().trim();
+
+            if (myString.length() > 0) {
+                boolean nameValid=true;
+
+                for(int i=0;i<userList.length;i++)
+                    if(myString.equalsIgnoreCase(userList[i])){
+                        nameValid=false;
+                        break;
+                    }
+                if(nameValid){
+                    UserName = myString.substring(0, 1).toUpperCase() + myString.substring(1);
+                    addUserToPi();}
+                else {
+                    showToastMessage(getString(R.string.userNamePresent));
+                }
+            } else {
+                showToastMessage(getString(R.string.noUserName));
+
+            }
+        }
+
+    }
+
+    private void addUserToPi() {
 
     }
 
@@ -130,26 +157,14 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         AdapterData[] data=new AdapterData[names.length];
 
         for(int i=0;i<names.length;i++){
-        switch (i) {
-            case XMLRoom.TYPE_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_room_sqr);
-                break;
-            case XMLRoom.TYPE_BED_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_bedroom_sqr);
-                break;
-            case XMLRoom.TYPE_GARDEN_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_garden_sqr);
-                break;
-            case XMLRoom.TYPE_KITCHEN_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_kitchen_sqr);
-                break;
-            case XMLRoom.TYPE_LIVING_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_living_room_sqr);
-                break;
-            case XMLRoom.TYPE_SWIMMING_POOL_ROOM:
-                data[i]=new AdapterData(names[i],R.drawable.img_swimming_pool_sqr);
-                break;
-        }}
+            switch (i) {
+                case XMLUser.USER_TYPE_RELAY:
+                    data[i]=new AdapterData(names[i],R.drawable.img_relay);
+                    break;
+                case XMLUser.USER_TYPE_SENSOR_DH11:
+                    data[i]=new AdapterData(names[i],R.drawable.img_dh11);
+                    break;
+            }}
 
         return data;
     }
@@ -159,70 +174,7 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.doneAddRoom) {
-            snackView = v;
-            String myString = etRoomName.getText().toString().trim();
-
-            if (myString.length() > 0) {
-                boolean nameValid=true;
-
-                for(int i=0;i<roomNameList.length;i++)
-                    if(myString.equalsIgnoreCase(roomNameList[i])){
-                        nameValid=false;
-                        break;
-                    }
-                if(nameValid){
-                    roomName = myString.substring(0, 1).toUpperCase() + myString.substring(1);
-                     addRoomToPi();}
-                else {
-                    showToastMessage(getString(R.string.roomNamePresent));
-                }
-            } else {
-                showToastMessage(getString(R.string.noNameRoom));
-
-            }
-        }
-    }
-
-    private void addRoomToPi() {
-        Integer ret = -1;
-        if(adapter.getSelected()>-1){
-        try {
-            ret = (Integer) new RaspberryTCPClient(myPi, getResources(), RaspberryTCPClient.TYPE_ADD_ROOM, roomName,adapter.getSelected()).execute().get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        if (ret == RaspberryTCPClient.OPERATION_DONE) {
-
-            showToastMessage(getString(R.string.roomAdded));
-
-            Intent data = new Intent();
-            data.putExtra(KEY_ROOM, roomName);
-            data.putExtra(KEY_ROOM_TYPE,adapter.getSelected());
-            setResult(Activity.RESULT_OK, data);
-
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            }, 1500);
-        } else {
-            showToastMessage(getString(R.string.addRoomError));
-        }}else{
-            showToastMessage(getString(R.string.textErrorSelectRoomType));
-        }
-
-    }
-
-
-    private class TypeAdapter extends RecyclerView.Adapter<AddRoomActivity.TypeAdapter.ViewHolder> {
+    private class TypeUserAdapter extends RecyclerView.Adapter<AddUserActivity.TypeUserAdapter.ViewHolder> {
 
         private AdapterData[] myData;
         private Context mContext;
@@ -232,12 +184,12 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         private int notSelectedColor;
 
 
-        public TypeAdapter(Context cont, AdapterData[] roomList) {
+        public TypeUserAdapter(Context cont, AdapterData[] roomList) {
             myData = roomList;
             mContext=cont;
             Resources res=cont.getResources();
             selectedColor=res.getColor(R.color.colorPrimary);
-            notSelectedColor=res.getColor(R.color.white);
+            notSelectedColor=res.getColor(R.color.black);
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -260,23 +212,23 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         @Override
-        public AddRoomActivity.TypeAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        public AddUserActivity.TypeUserAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.type_room_recycler_view, parent, false);
             // set the view's size, margins, paddings and layout parameters
             //...
-            AddRoomActivity.TypeAdapter.ViewHolder vh = new AddRoomActivity.TypeAdapter.ViewHolder(v);
+            AddUserActivity.TypeUserAdapter.ViewHolder vh = new AddUserActivity.TypeUserAdapter.ViewHolder(v);
             return vh;
         }
 
         @Override
-        public void onBindViewHolder(AddRoomActivity.TypeAdapter.ViewHolder holder, int position) {
+        public void onBindViewHolder(AddUserActivity.TypeUserAdapter.ViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
             holder.tvType.setText(myData[position].getName());
             Glide.with(mContext).load(myData[position].getImageResources()).into(holder.imgRoomType);
             if(myData[position].isSelected())
-                 holder.tvType.setTextColor(selectedColor);
+                holder.tvType.setTextColor(selectedColor);
             else
                 holder.tvType.setTextColor(notSelectedColor);
 
@@ -284,7 +236,7 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
             holder.cvRoomCard.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                  selectItem(position);
+                    selectItem(position);
 
                 }
             });
@@ -336,5 +288,4 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
             return Selected;
         }
     }
-
 }

@@ -64,14 +64,25 @@
         </activity>
         <activity
             android:name=".ViewRoomActivity"
-            android:label="@string/title_activity_view_room"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"
+            android:label="@string/title_activity_view_room"
             android:parentActivityName=".HomeActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.hpdev.picontrol.HomeActivity" />
+        </activity>
+        <activity
+            android:name=".AddUserActivity"
+            android:label="@string/title_activity_add_user"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".ViewRoomActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.hpdev.picontrol.ViewRoomActivity" />
         </activity>
     </application>
 

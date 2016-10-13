@@ -24,12 +24,15 @@ public class RaspberryTCPClient extends AsyncTask {
     public static final String DONE_MESSAGE="done";
     public static final Integer OPERATION_DONE=1;
     public static final Integer OPERATION_FAIL=-1;
+    public static final Integer OPERATION_FAIL_NO_PIN=-2;
 
     private String pi_ip;
     private Resources Res;
     private String RequestType;
     private String roomName;
     private String roomType;
+    private String UserType;
+    private String UserName;
 
     public RaspberryTCPClient(String pi_ip, Resources res, String type_request) {
         this.pi_ip=pi_ip;
@@ -43,6 +46,15 @@ public class RaspberryTCPClient extends AsyncTask {
         RequestType=type_request;
         this.roomName=roomName;
         this.roomType=String.valueOf(roomType);
+    }
+
+    public RaspberryTCPClient(String pi_ip, Resources res, String type_request,String UserName, int UserType,String roomName) {
+        this.pi_ip=pi_ip;
+        Res=res;
+        RequestType=type_request;
+        this.UserName=UserName;
+        this.UserType=String.valueOf(UserType);
+        this.roomName=roomName;
     }
 
     @Override
@@ -98,6 +110,25 @@ public class RaspberryTCPClient extends AsyncTask {
                 clientSocket.close();
                 return xml;
 
+            }
+
+            if(RequestType.equals(TYPE_ADD_USER)){
+
+                outToServer.writeBytes(TYPE_ADD_USER+"\n");
+                serverResp = inFromServer.readLine();
+                if(serverResp.equals(WAIT_MESSAGE)){
+                    serverResp="";
+                    outToServer.writeBytes(UserType+"\n");
+                    serverResp = inFromServer.readLine();
+                    if(serverResp.equals(WAIT_MESSAGE)){
+                        outToServer.writeBytes(UserName+"\n");
+                        outToServer.writeBytes(roomName+"\n");
+
+                    }else{
+                        clientSocket.close();
+                        return OPERATION_FAIL_NO_PIN;
+                    }
+                }
             }
 
 

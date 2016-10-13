@@ -49,9 +49,13 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private final static int REQUEST_ADD_ROOM=21423;
     private final static String KEY_ROOM="myRoom";
     private final static String KEY_ROOM_TYPE="myRoom_Type";
+    private final static String KEY_ROOM_LIST="myRoom_List";
+    private final static String KEY_USER_LIST="myUser_List";
     private XMLWrapper fileWrapper=null;
     private TextView tvOffline;
     private View snackView;
+    private String[] roomNameList;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -129,7 +133,7 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         fabAddRoom=(FloatingActionButton) v.findViewById(R.id.fabAddRoom);
         fabAddRoom.setOnClickListener(this);
 
-
+        roomNameList=getRoomNameList();
         return v;
     }
 
@@ -146,6 +150,8 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
             myPi.addRoom(Room);
         }
     }
+
+
 
 
 
@@ -212,6 +218,7 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 Intent intent = new Intent(getActivity(), AddRoomActivity.class);
 
                 intent.putExtra(AddRoomActivity.KEY_PI_IP, myPi.getPiIP());
+                intent.putExtra(KEY_ROOM_LIST,roomNameList);
 
                 startActivityForResult(intent, REQUEST_ADD_ROOM);
             }else{
@@ -225,6 +232,28 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     }
 
+    private String[] getRoomNameList() {
+        ArrayList<XMLRoom> list=myPi.getRoomList();
+        String[] array=new String[list.size()];
+
+        for(int i=0;i<list.size();i++)
+            array[i]=list.get(i).getName();
+
+
+        return array;
+    }
+
+    private String[] getUserNameList(int position) {
+        ArrayList<XMLUser> list=myPi.getRoomList().get(position).getUserList();
+        String[] array=new String[list.size()];
+
+        for(int i=0;i<list.size();i++)
+            array[i]=list.get(i).getUserName();
+
+
+        return array;
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -236,6 +265,7 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
             adapter.notifyDataSetChanged();
             roomRecyclerView.setVisibility(View.VISIBLE);
             tvEmptyRoom.setVisibility(View.GONE);
+            roomNameList=getRoomNameList();
         }
 
     }
@@ -257,7 +287,13 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
 
         public void onItemClick(int position) {
-            Log.v("HEREEEEEEEEE","Press "+String.valueOf(position));
+
+            Intent intent =new Intent(getActivity(),ViewRoomActivity.class);
+            intent.putExtra(KEY_ROOM,myData.get(position).getName());
+            intent.putExtra(AddRoomActivity.KEY_PI_IP, myPi.getPiIP());
+            intent.putExtra(KEY_USER_LIST,getUserNameList(position));
+            startActivity(intent);
+
         }
 
 

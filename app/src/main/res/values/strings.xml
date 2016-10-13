@@ -75,5 +75,20 @@
     <string name="roomAdded">Stanza aggiunta con successo.</string>
     <string name="addRoomError">Problemi di comunicazione col Server.\nRiprovare</string>
     <string name="raspberryPkg">com.hpdev</string>
+    <string name="textRaspberryOffline">Il tuo Raspberry Pi è Offline.</string>
+
+    <string name="textSelectRoomType">Seleziona il tipo di Stanza</string>
+    <string name="textErrorSelectRoomType">Seleziona un tipo di Stanza</string>
+
+    <string-array name="roomTypeName">
+        <item>Stanza</item>
+        <item>Soggiorno</item>
+        <item>Stanza da Letto</item>
+        <item>Cucina</item>
+        <item>Piscina</item>
+        <item>Giardino</item>
+    </string-array>
+    <string name="title_activity_view_room">ViewRoomActivity</string>
+
 
 </resources>

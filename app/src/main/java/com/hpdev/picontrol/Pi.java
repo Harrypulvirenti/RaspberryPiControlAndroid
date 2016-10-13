@@ -17,21 +17,25 @@ public class Pi implements Parcelable {
     private String piName;
     private String piIP;
     private String piLastUpdate;
-    private ArrayList<Room> roomList;
+    private ArrayList<XMLRoom> roomList;
 
     public Pi(String piID, String piName, String piIP, String piLastUpdate) {
         this.piID = piID;
         this.piName = piName;
         this.piIP = piIP;
         this.piLastUpdate = piLastUpdate;
-        roomList=new ArrayList<Room>();
+        roomList=new ArrayList<XMLRoom>();
     }
 
-    public void addRoom(Room room){
+    public void destroyRoomList(){
+        roomList.clear();
+    }
+
+    public void addRoom(XMLRoom room){
         roomList.add(room);
     }
 
-    public ArrayList<Room> getRoomList(){
+    public ArrayList<XMLRoom> getRoomList(){
         return roomList;
     }
 

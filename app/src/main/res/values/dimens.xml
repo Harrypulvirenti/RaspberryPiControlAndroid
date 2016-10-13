@@ -8,4 +8,5 @@
     <dimen name="speakDimension">200dp</dimen>
     <dimen name="icon_margin">72dp</dimen>
     <dimen name="fab_Dimension">69dp</dimen>
+    <dimen name="divider_size">8dp</dimen>
 </resources>

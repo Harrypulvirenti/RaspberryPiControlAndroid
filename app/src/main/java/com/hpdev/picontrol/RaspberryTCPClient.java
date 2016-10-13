@@ -29,6 +29,7 @@ public class RaspberryTCPClient extends AsyncTask {
     private Resources Res;
     private String RequestType;
     private String roomName;
+    private String roomType;
 
     public RaspberryTCPClient(String pi_ip, Resources res, String type_request) {
         this.pi_ip=pi_ip;
@@ -36,11 +37,12 @@ public class RaspberryTCPClient extends AsyncTask {
         RequestType=type_request;
     }
 
-    public RaspberryTCPClient(String pi_ip, Resources res, String type_request,String roomName) {
+    public RaspberryTCPClient(String pi_ip, Resources res, String type_request,String roomName, int roomType) {
         this.pi_ip=pi_ip;
         Res=res;
         RequestType=type_request;
         this.roomName=roomName;
+        this.roomType=String.valueOf(roomType);
     }
 
     @Override
@@ -62,6 +64,7 @@ public class RaspberryTCPClient extends AsyncTask {
                 if(serverResp.equals(WAIT_MESSAGE)){
 
                     outToServer.writeBytes(roomName+"\n");
+                    outToServer.writeBytes(roomType+"\n");
                     serverResp = inFromServer.readLine();
                     if(serverResp.equals(DONE_MESSAGE)){
                         clientSocket.close();
@@ -100,7 +103,7 @@ public class RaspberryTCPClient extends AsyncTask {
 
 
         } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
 
         return null;

@@ -1,9 +1,12 @@
 package com.hpdev.picontrol;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,8 +15,10 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -22,19 +27,24 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
 public class AddUserActivity extends AppCompatActivity implements View.OnClickListener{
 
     private FloatingActionButton fabDoneAddOn;
     private EditText etUserName;
-    public final static String KEY_PI_IP = "MyPi_IP";
-    private final static String KEY_USER_LIST="myUser_List";
+    private int MyPi;
+    private int MyRoom;
+    private final static String KEY_PI="MyPi";
+    private static final String KEY_ROOM_POS="Room_Pos";
     private final static String KEY_ROOM="myRoom";
-    private String myPi;
+
     private View snackView;
 
     private RecyclerView typeUserRecyclerView;
     private GridLayoutManager layoutManager;
-    private  TypeUserAdapter adapter;
+    private TypeUserAdapter adapter;
     private String UserName="";
     private String roomName;
     private String[] userList;
@@ -54,9 +64,11 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
 
 
         etUserName = (EditText) findViewById(R.id.addUserName);
-        roomName=getIntent().getStringExtra(KEY_ROOM);
-        myPi = getIntent().getStringExtra(KEY_PI_IP);
-        userList=getIntent().getStringArrayExtra(KEY_USER_LIST);
+        Intent intent=getIntent();
+        roomName=intent.getStringExtra(KEY_ROOM);
+        MyPi = intent.getIntExtra(KEY_PI,0);
+        MyRoom=intent.getIntExtra(KEY_ROOM_POS,0);
+        userList=ActivityCoordinator.getRoomUserList(MyPi,MyRoom);
 
 
         layoutManager = new GridLayoutManager(this, 2);
@@ -107,8 +119,59 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
 
     private void addUserToPi() {
 
+        ArrayList<XMLPin> xmlPins=null;
+        if(adapter.getSelected()>-1){
+            try {
+                xmlPins = (ArrayList<XMLPin>) new RaspberryTCPClient(ActivityCoordinator.getPiIP(MyPi), getResources(), RaspberryTCPClient.TYPE_ADD_USER, UserName,adapter.getSelected(),roomName).execute().get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            if (xmlPins!=null) {
+
+                showToastMessage(getString(R.string.addOnAdded));
+
+                ActivityCoordinator.addUserToRoom(new XMLUser(UserName,adapter.getSelected(),xmlPins),MyPi,MyRoom);
+
+                //Intent data = new Intent();
+                //data.putExtra(KEY_ROOM, roomName);
+                //setResult(Activity.RESULT_OK, data);
+
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        finish();
+                    }
+                }, 1500);
+            } else {
+                showToastMessage(getString(R.string.addRoomError));
+            }}else{
+            showToastMessage(getString(R.string.errorSelectUserType));
+        }
+
+
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+       if(item.getItemId()==android.R.id.home){
+           Intent intent=new Intent();
+           intent.putExtra(KEY_ROOM,roomName);
+           setResult(RESULT_CANCELED,intent);
+           finish();
+           return true;
+       }
+
+
+
+        return super.onOptionsItemSelected(item);
+
+
+    }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
 
@@ -188,8 +251,8 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
             myData = roomList;
             mContext=cont;
             Resources res=cont.getResources();
-            selectedColor=res.getColor(R.color.colorPrimary);
-            notSelectedColor=res.getColor(R.color.black);
+            selectedColor=R.drawable.selected_background;
+            notSelectedColor=R.drawable.non_selected_background;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -202,8 +265,8 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
             public ViewHolder(View vCard) {
                 super(vCard);
                 cvRoomCard = (CardView) vCard.findViewById(R.id.card_view);
-                tvType = (TextView) vCard.findViewById(R.id.tvTypeName);
-                imgRoomType = (ImageView) vCard.findViewById(R.id.img_roomType);
+                tvType = (TextView) vCard.findViewById(R.id.tvUserName);
+                imgRoomType = (ImageView) vCard.findViewById(R.id.img_userType);
             }
         }
 
@@ -214,7 +277,7 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
         @Override
         public AddUserActivity.TypeUserAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.type_room_recycler_view, parent, false);
+                    .inflate(R.layout.type_user_recycler_view, parent, false);
             // set the view's size, margins, paddings and layout parameters
             //...
             AddUserActivity.TypeUserAdapter.ViewHolder vh = new AddUserActivity.TypeUserAdapter.ViewHolder(v);
@@ -228,9 +291,9 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
             holder.tvType.setText(myData[position].getName());
             Glide.with(mContext).load(myData[position].getImageResources()).into(holder.imgRoomType);
             if(myData[position].isSelected())
-                holder.tvType.setTextColor(selectedColor);
+                holder.tvType.setBackground(getDrawable(selectedColor));
             else
-                holder.tvType.setTextColor(notSelectedColor);
+                holder.tvType.setBackground(getDrawable(notSelectedColor));
 
 
             holder.cvRoomCard.setOnClickListener(new View.OnClickListener() {

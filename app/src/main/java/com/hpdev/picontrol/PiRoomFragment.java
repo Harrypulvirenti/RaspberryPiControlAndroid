@@ -37,9 +37,10 @@ import java.util.concurrent.ExecutionException;
  */
 public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener {
 
-    public final static String KEY_PI="MyPi";
+    private final static String KEY_PI="MyPi";
+    private static final String KEY_ROOM_POS="Room_Pos";
 
-    private Pi myPi;
+    private int MyPi;
     private SwipeRefreshLayout refreshLayout;
     private RecyclerView roomRecyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -48,13 +49,8 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
     private FloatingActionButton fabAddRoom;
     private final static int REQUEST_ADD_ROOM=21423;
     private final static String KEY_ROOM="myRoom";
-    private final static String KEY_ROOM_TYPE="myRoom_Type";
-    private final static String KEY_ROOM_LIST="myRoom_List";
-    private final static String KEY_USER_LIST="myUser_List";
-    private XMLWrapper fileWrapper=null;
     private TextView tvOffline;
     private View snackView;
-    private String[] roomNameList;
 
 
     @Override
@@ -74,35 +70,14 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
         if(extra!=null){
 
-            myPi=extra.getParcelable(KEY_PI);
+            MyPi=extra.getInt(KEY_PI);
 
         }
 
-
-        try {
-            String xml= (String) new RaspberryTCPClient(myPi.getPiIP(),getResources(),RaspberryTCPClient.TYPE_UPDATE_REQUEST).execute().get();
-            if(xml!=null){
-                xml=xml.replaceAll(getString(R.string.raspberryPkg),getActivity().getPackageName());
-                XStream xstream = new XStream(new DomDriver());
-
-                fileWrapper=(XMLWrapper)xstream.fromXML(xml);
-            }else{
-                roomRecyclerView.setVisibility(View.GONE);
-                tvOffline.setVisibility(View.VISIBLE);
-            }
-
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
+        if(!ActivityCoordinator.initRoomList(MyPi)){
+            roomRecyclerView.setVisibility(View.GONE);
+            tvOffline.setVisibility(View.VISIBLE);
         }
-
-        if(fileWrapper!=null){
-           initRoomList();
-
-        }
-
 
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(v.getContext());
@@ -119,13 +94,13 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         roomRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // specify an adapter (see also next example)
-        adapter = new RoomAdapter(getContext(), myPi.getRoomList());
+        adapter = new RoomAdapter(getContext(), ActivityCoordinator.getRoomList(MyPi));
         roomRecyclerView.setAdapter(adapter);
 
 
         tvEmptyRoom=(TextView)v.findViewById(R.id.tvEmptyRom);
 
-        if(myPi.getRoomList().size()==0&&tvOffline.getVisibility()==View.GONE) {
+        if(ActivityCoordinator.getRoomListSize(MyPi)==0&&tvOffline.getVisibility()==View.GONE) {
             roomRecyclerView.setVisibility(View.GONE);
             tvEmptyRoom.setVisibility(View.VISIBLE);
         }
@@ -133,7 +108,6 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         fabAddRoom=(FloatingActionButton) v.findViewById(R.id.fabAddRoom);
         fabAddRoom.setOnClickListener(this);
 
-        roomNameList=getRoomNameList();
         return v;
     }
 
@@ -142,46 +116,19 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
     }
 
-    private void initRoomList(){
-        ArrayList<XMLRoom> room=fileWrapper.getXMLRoomList();
-        for(int i=0;i<room.size();i++){
-            XMLRoom Room=room.get(i);
-            Room.initRoomImg();
-            myPi.addRoom(Room);
-        }
-    }
-
-
 
 
 
 
     @Override
     public void onRefresh() {
+        ArrayList<XMLRoom> list=ActivityCoordinator.updateRoomList(MyPi);
 
-        try {
-            String xml= (String) new RaspberryTCPClient(myPi.getPiIP(),getResources(),RaspberryTCPClient.TYPE_UPDATE_REQUEST).execute().get();
-            fileWrapper=null;
-            if(xml!=null){
+            if(list!=null){
 
-                xml=xml.replaceAll(getString(R.string.raspberryPkg),getActivity().getPackageName());
-                XStream xstream = new XStream(new DomDriver());
+                if(list.size()>0) {
 
-                fileWrapper=(XMLWrapper)xstream.fromXML(xml);
-            }else{
-                roomRecyclerView.setVisibility(View.GONE);
-                tvOffline.setVisibility(View.VISIBLE);
-            }
-
-            if(fileWrapper!=null){
-
-                myPi.destroyRoomList();
-
-                initRoomList();
-
-                if(myPi.getRoomList().size()>0) {
-
-                    adapter.setMyData(myPi.getRoomList());
+                    adapter.setMyData(list);
                     adapter.notifyDataSetChanged();
                     roomRecyclerView.setVisibility(View.VISIBLE);
                     tvOffline.setVisibility(View.GONE);
@@ -191,19 +138,12 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
                     tvEmptyRoom.setVisibility(View.VISIBLE);
                     tvOffline.setVisibility(View.GONE);
                 }
-
+            }else{
+                roomRecyclerView.setVisibility(View.GONE);
+                tvOffline.setVisibility(View.VISIBLE);
             }
+        refreshLayout.setRefreshing(false);
 
-
-
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }finally {
-            refreshLayout.setRefreshing(false);
-        }
 
 
     }
@@ -217,8 +157,7 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
             if(tvOffline.getVisibility()==View.GONE) {
                 Intent intent = new Intent(getActivity(), AddRoomActivity.class);
 
-                intent.putExtra(AddRoomActivity.KEY_PI_IP, myPi.getPiIP());
-                intent.putExtra(KEY_ROOM_LIST,roomNameList);
+                intent.putExtra(KEY_PI, MyPi);
 
                 startActivityForResult(intent, REQUEST_ADD_ROOM);
             }else{
@@ -232,27 +171,6 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     }
 
-    private String[] getRoomNameList() {
-        ArrayList<XMLRoom> list=myPi.getRoomList();
-        String[] array=new String[list.size()];
-
-        for(int i=0;i<list.size();i++)
-            array[i]=list.get(i).getName();
-
-
-        return array;
-    }
-
-    private String[] getUserNameList(int position) {
-        ArrayList<XMLUser> list=myPi.getRoomList().get(position).getUserList();
-        String[] array=new String[list.size()];
-
-        for(int i=0;i<list.size();i++)
-            array[i]=list.get(i).getUserName();
-
-
-        return array;
-    }
 
 
     @Override
@@ -260,12 +178,11 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         super.onActivityResult(requestCode, resultCode, data);
 
         if(requestCode==REQUEST_ADD_ROOM&&resultCode== Activity.RESULT_OK){
-            myPi.addRoom(new XMLRoom(data.getStringExtra(KEY_ROOM),data.getIntExtra(KEY_ROOM_TYPE,0)));
-            adapter.setMyData(myPi.getRoomList());
+
+            adapter.setMyData(ActivityCoordinator.getRoomList(MyPi));
             adapter.notifyDataSetChanged();
             roomRecyclerView.setVisibility(View.VISIBLE);
             tvEmptyRoom.setVisibility(View.GONE);
-            roomNameList=getRoomNameList();
         }
 
     }
@@ -290,8 +207,9 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
             Intent intent =new Intent(getActivity(),ViewRoomActivity.class);
             intent.putExtra(KEY_ROOM,myData.get(position).getName());
-            intent.putExtra(AddRoomActivity.KEY_PI_IP, myPi.getPiIP());
-            intent.putExtra(KEY_USER_LIST,getUserNameList(position));
+            intent.putExtra(KEY_PI, MyPi);
+            intent.putExtra(KEY_ROOM_POS,position);
+
             startActivity(intent);
 
         }

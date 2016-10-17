@@ -14,6 +14,9 @@ public class XMLUser {
 
 
 
+
+
+
     private ArrayList<XMLPin> PinList;
     private String UserName;
     private int Type;

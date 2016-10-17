@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * Created by harry on 11/10/2016.
@@ -34,10 +35,19 @@ public class RaspberryTCPClient extends AsyncTask {
     private String UserType;
     private String UserName;
 
+    private Command CommandResult;
+
     public RaspberryTCPClient(String pi_ip, Resources res, String type_request) {
         this.pi_ip=pi_ip;
         Res=res;
         RequestType=type_request;
+    }
+
+    public RaspberryTCPClient(String pi_ip, Resources res, String type_request, Command command) {
+        this.pi_ip=pi_ip;
+        Res=res;
+        RequestType=type_request;
+        CommandResult=command;
     }
 
     public RaspberryTCPClient(String pi_ip, Resources res, String type_request,String roomName, int roomType) {
@@ -123,12 +133,53 @@ public class RaspberryTCPClient extends AsyncTask {
                     if(serverResp.equals(WAIT_MESSAGE)){
                         outToServer.writeBytes(UserName+"\n");
                         outToServer.writeBytes(roomName+"\n");
+                        ArrayList<XMLPin> users=new ArrayList<XMLPin>();
+                        while (true){
+                            serverResp = inFromServer.readLine();
+                            if(!serverResp.equals(DONE_MESSAGE)){
+                                users.add(new XMLPin(Integer.parseInt(serverResp),UserName,Integer.parseInt(UserType)));
+                            }else{
+                                clientSocket.close();
+                                return users;
+                            }
+
+                        }
 
                     }else{
                         clientSocket.close();
                         return OPERATION_FAIL_NO_PIN;
                     }
                 }
+            }
+
+
+            if(RequestType.equals(TYPE_EXEC_COMMAND)){
+
+                outToServer.writeBytes(TYPE_EXEC_COMMAND+"\n");
+                serverResp = inFromServer.readLine();
+                if(serverResp.equals(WAIT_MESSAGE)){
+
+                    outToServer.writeBytes(CommandResult.getRoomName()+"\n");
+                    outToServer.writeBytes(CommandResult.getUserName()+"\n");
+                    outToServer.writeBytes(CommandResult.getCommand()+"\n");
+                    String resp=inFromServer.readLine();
+                    Log.v("HEREEEEEEEE",resp);
+                    serverResp = inFromServer.readLine();
+                    if(serverResp.equals(DONE_MESSAGE)){
+                        clientSocket.close();
+                        return resp;
+                    }else{
+                        clientSocket.close();
+                        return OPERATION_FAIL;
+                    }
+
+
+                }else{
+                    clientSocket.close();
+                    return OPERATION_FAIL;
+                }
+
+
             }
 
 

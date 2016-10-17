@@ -8,18 +8,13 @@
     <integer name="IPValidity">600000</integer>
     <string name="getIPURL">http://harrydev.altervista.org/Tesi/getIP.php</string>
 
-    <string-array name="commandArray">
-        <item>Spegni la Luce</item>
-        <item>Accendi la Luce</item>
-        <item>Che Temperatura C\'è</item>
-        <item>Accendi il Condizionatore</item>
 
-    </string-array>
     <integer name="noOfMatches">10</integer>
     <string name="SpeakString">Inserisci un Comando.</string>
     <string name="SpeakCommandNotFoundError">Comando non Riconosciuto.</string>
     <string name="RecognizerLanguage">it-IT</string>
     <string name="NoRecognizerActivityLink">https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox</string>
+    <string name="errorNoCommand">Aggiungere Add On per Generare Comandi.</string>
 
     <integer name="PortNumber">8888</integer>
 
@@ -95,14 +90,21 @@
     <string name="textAddUser">Aggiungi Funzionalità al tuo Raspberry Pi.</string>
     <string name="textUserType">Add On Disponibili</string>
 
-    <string-array name="userTypeName">
-        <item>Relay</item>
-        <item>Sensore di Temperatura DH11</item>
-    </string-array>
+
 
     <string name="noUserName">Aggiungere un nome all\'Add On per Proseguire.</string>
     <string name="UserAdded">Add On aggiunto con successo.</string>
     <string name="userNamePresent">Nome Add On già in uso per questa stanza.</string>
+    <string name="errorSelectUserType">Selezionare un tipo di Add On.</string>
+
+    <string name="addOnAdded">Add On aggiunto con successo.</string>
+
+
+    <string-array name="userTypeName">
+        <item>Relay</item>
+        <item>DHT11</item>
+    </string-array>
+
 
 
 </resources>

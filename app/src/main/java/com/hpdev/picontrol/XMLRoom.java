@@ -68,6 +68,10 @@ public class XMLRoom {
             initRoomImg();
         }
 
+    public void addUser(XMLUser user){
+        userList.add(user);
+    }
+
         public String getName() {
             return Name;
         }

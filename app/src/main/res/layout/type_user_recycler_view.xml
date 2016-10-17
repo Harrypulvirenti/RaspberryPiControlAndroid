@@ -20,17 +20,17 @@
 
 
     <ImageView
-        android:id="@+id/img_roomType"
+        android:id="@+id/img_userType"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:src="@drawable/img_room" />
 
     <TextView
-        android:id="@+id/tvTypeName"
+        android:id="@+id/tvUserName"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/img_roomType"
+        android:layout_below="@id/img_userType"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:background="@drawable/non_selected_background"

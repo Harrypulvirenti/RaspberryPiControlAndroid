@@ -36,6 +36,7 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
     private FloatingActionButton fabDoneAddRoom;
     private EditText etRoomName;
     private String roomName = null;
+    public final static String KEY_PI="MyPi";
     public final static String KEY_PI_IP = "MyPi_IP";
     private final static String KEY_ROOM = "myRoom";
     private final static String KEY_ROOM_TYPE = "myRoom_Type";
@@ -46,7 +47,7 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
     private AddRoomActivity.TypeAdapter adapter;
 
 
-    private String myPi;
+    private int MyPi;
     private String[] roomNameList;
 
     @Override
@@ -61,8 +62,8 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         etRoomName = (EditText) findViewById(R.id.addRoomName);
-        myPi = getIntent().getStringExtra(KEY_PI_IP);
-        roomNameList=getIntent().getStringArrayExtra(KEY_ROOM_LIST);
+        MyPi = getIntent().getIntExtra(KEY_PI,0);
+        roomNameList=ActivityCoordinator.getRoomListName(MyPi);
 
         layoutManager = new GridLayoutManager(this, 2);
 
@@ -190,7 +191,7 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         Integer ret = -1;
         if(adapter.getSelected()>-1){
         try {
-            ret = (Integer) new RaspberryTCPClient(myPi, getResources(), RaspberryTCPClient.TYPE_ADD_ROOM, roomName,adapter.getSelected()).execute().get();
+            ret = (Integer) new RaspberryTCPClient(ActivityCoordinator.getPiIP(MyPi), getResources(), RaspberryTCPClient.TYPE_ADD_ROOM, roomName,adapter.getSelected()).execute().get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -201,10 +202,9 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
 
             showToastMessage(getString(R.string.roomAdded));
 
-            Intent data = new Intent();
-            data.putExtra(KEY_ROOM, roomName);
-            data.putExtra(KEY_ROOM_TYPE,adapter.getSelected());
-            setResult(Activity.RESULT_OK, data);
+            ActivityCoordinator.addRoomToPi(new XMLRoom(roomName,adapter.getSelected()),MyPi);
+
+            setResult(Activity.RESULT_OK);
 
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -235,9 +235,8 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         public TypeAdapter(Context cont, AdapterData[] roomList) {
             myData = roomList;
             mContext=cont;
-            Resources res=cont.getResources();
-            selectedColor=res.getColor(R.color.colorPrimary);
-            notSelectedColor=res.getColor(R.color.white);
+            selectedColor=R.drawable.selected_background;
+            notSelectedColor=R.drawable.non_selected_background;
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
@@ -276,9 +275,9 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
             holder.tvType.setText(myData[position].getName());
             Glide.with(mContext).load(myData[position].getImageResources()).into(holder.imgRoomType);
             if(myData[position].isSelected())
-                 holder.tvType.setTextColor(selectedColor);
+                 holder.tvType.setBackground(getDrawable(selectedColor));
             else
-                holder.tvType.setTextColor(notSelectedColor);
+                holder.tvType.setBackground(getDrawable(notSelectedColor));
 
 
             holder.cvRoomCard.setOnClickListener(new View.OnClickListener() {

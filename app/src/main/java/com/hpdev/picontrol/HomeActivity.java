@@ -265,7 +265,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             CheckIP(ActivityCoordinator.getPi(selectedPi));
             StartVoiceRecognition();
             showSpeakCard();
-        } else if(v.getId()==R.id.fabStartListening&&speakIsOpen&&!isSpeechOnListening){
+        } else if(v.getId()==R.id.fabStartListening&&speakIsOpen&&!isSpeechOnListening&&CommandResult==null){
             StartVoiceRecognition();
         }
         if(v.getId()==R.id.hide_button){
@@ -325,13 +325,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         speakIsOpen=true;
         speakLayout.setVisibility(View.VISIBLE);
         animator.start();
-
-    }
-
-    private void serverResponse(int result){
-
-        startTTS("La temperatura è di "+String.valueOf(result)+" gradi");
-
 
     }
 
@@ -514,7 +507,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onResponse(String response) {
                         if(Integer.parseInt(response)>0){
-
+                            Log.v("HEREEEEEEE ",selectedPi+" ");
                             Pi newPi=ActivityCoordinator.getPi(selectedPi);
                             newPi.setPiIP(response);
                             //ActivityCoordinator.replacePi(newPi,selectedPi);
@@ -631,8 +624,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
             ArrayList<String> textMatchlist = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
-
             CommandResult=null;
+
 
             if(commands.size()>0){
             if (!textMatchlist.isEmpty()){
@@ -643,7 +636,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
                         if(text.contains(commands.get(j).getRoomName().toLowerCase())&&text.contains(commands.get(j).getUserName().toLowerCase())&&text.contains(commands.get(j).getCommandString().toLowerCase())){
                             CommandResult=commands.get(j);
-                            break;
                         }
                     }
                     if(CommandResult!=null){
@@ -688,13 +680,31 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void SendCommand() {
-        try {
-           Integer resp=(Integer) new RaspberryTCPClient(ActivityCoordinator.getPiIP(selectedPi), getResources(), RaspberryTCPClient.TYPE_EXEC_COMMAND, CommandResult).execute().get();
+        String resp=null;
+       try {
+           resp=(String) new RaspberryTCPClient(ActivityCoordinator.getPiIP(selectedPi), getResources(), RaspberryTCPClient.TYPE_EXEC_COMMAND, CommandResult).execute().get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+
+        if(resp!=null){
+            handleServerResult(resp);
+        }
+    }
+
+    private void handleServerResult(String resp) {
+
+        String[] parts = resp.split("-");
+        String[] type=getResources().getStringArray(R.array.userTypeName);
+
+
+        if(parts[0].equals(type[1])){
+            startTTS(getString(R.string.ttsDHT11_First)+parts[1]+getString(R.string.ttsDHT11_Second)+parts[2]+"%");
+        }
+
+
     }
 
 

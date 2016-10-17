@@ -23,9 +23,9 @@ public class RaspberryTCPClient extends AsyncTask {
     public static final String TYPE_UPDATE_REQUEST="update";
     public static final String WAIT_MESSAGE="ok_send_me";
     public static final String DONE_MESSAGE="done";
-    public static final Integer OPERATION_DONE=1;
-    public static final Integer OPERATION_FAIL=-1;
-    public static final Integer OPERATION_FAIL_NO_PIN=-2;
+    public static final String OPERATION_DONE="done";
+    public static final String OPERATION_FAIL="fail";
+    public static final String OPERATION_FAIL_NO_PIN="noPin";
 
     private String pi_ip;
     private Resources Res;
@@ -163,7 +163,6 @@ public class RaspberryTCPClient extends AsyncTask {
                     outToServer.writeBytes(CommandResult.getUserName()+"\n");
                     outToServer.writeBytes(CommandResult.getCommand()+"\n");
                     String resp=inFromServer.readLine();
-                    Log.v("HEREEEEEEEE",resp);
                     serverResp = inFromServer.readLine();
                     if(serverResp.equals(DONE_MESSAGE)){
                         clientSocket.close();

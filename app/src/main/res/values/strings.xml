@@ -101,10 +101,11 @@
 
 
     <string-array name="userTypeName">
-        <item>Relay</item>
-        <item>DHT11</item>
-    </string-array>
+    <item>Relay</item>
+    <item>DHT11</item>
+</string-array>
 
-
+<string name="ttsDHT11_First">C\'è una temperatura di </string>
+    <string name="ttsDHT11_Second">gradi ed un\'umidità relativa di </string>
 
 </resources>

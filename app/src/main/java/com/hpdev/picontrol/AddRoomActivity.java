@@ -188,17 +188,17 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     private void addRoomToPi() {
-        Integer ret = -1;
+        String ret = null;
         if(adapter.getSelected()>-1){
         try {
-            ret = (Integer) new RaspberryTCPClient(ActivityCoordinator.getPiIP(MyPi), getResources(), RaspberryTCPClient.TYPE_ADD_ROOM, roomName,adapter.getSelected()).execute().get();
+            ret = (String) new RaspberryTCPClient(ActivityCoordinator.getPiIP(MyPi), getResources(), RaspberryTCPClient.TYPE_ADD_ROOM, roomName,adapter.getSelected()).execute().get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
 
-        if (ret == RaspberryTCPClient.OPERATION_DONE) {
+        if (ret.equals(RaspberryTCPClient.OPERATION_DONE)) {
 
             showToastMessage(getString(R.string.roomAdded));
 

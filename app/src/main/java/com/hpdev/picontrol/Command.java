@@ -10,6 +10,10 @@ public class Command {
     private String UserName;
     private String CommandString;
     private int Command;
+    private boolean commandNoUsername;
+
+    public static final boolean TYPE_NO_USERNAME=false;
+    public static final boolean TYPE_USERNAME=true;
 
     public Command(String piName, String roomName, String userName, String commandString, int command) {
         PiName = piName;
@@ -17,8 +21,16 @@ public class Command {
         UserName = userName;
         Command = command;
         CommandString=commandString;
+        commandNoUsername=TYPE_USERNAME;
     }
 
+    public Boolean haveUserName(){
+        return commandNoUsername;
+    }
+
+    public void setCommandNoUsername(boolean commandNoUsername) {
+        this.commandNoUsername = commandNoUsername;
+    }
 
     public String getPiName() {
         return PiName;

@@ -203,7 +203,10 @@ public class ActivityCoordinator {
 
                     String[] commands=getCommand(user.getType());
                     for (int n=0;n<commands.length;n++){
-                        CommandList.add(new Command(pi.getPiName(),room.getName(),user.getUserName(),commands[n],n));
+                        Command cmd=new Command(pi.getPiName(),room.getName(),user.getUserName(),commands[n],n);
+                        if(user.getType()==XMLUser.USER_TYPE_SENSOR_DH11)
+                            cmd.setCommandNoUsername(Command.TYPE_NO_USERNAME);
+                        CommandList.add(cmd);
                     }
                 }
             }

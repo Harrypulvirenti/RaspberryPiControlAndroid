@@ -106,6 +106,6 @@
 </string-array>
 
 <string name="ttsDHT11_First">C\'è una temperatura di </string>
-    <string name="ttsDHT11_Second">gradi ed un\'umidità relativa di </string>
+    <string name="ttsDHT11_Second">gradi ed un\'umidità relativa del </string>
 
 </resources>

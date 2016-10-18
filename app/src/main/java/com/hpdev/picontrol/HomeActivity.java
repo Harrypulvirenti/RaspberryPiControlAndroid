@@ -42,11 +42,6 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -506,8 +501,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if(Integer.parseInt(response)>0){
-                            Log.v("HEREEEEEEE ",selectedPi+" ");
+                        if(!response.equals("error")){
                             Pi newPi=ActivityCoordinator.getPi(selectedPi);
                             newPi.setPiIP(response);
                             //ActivityCoordinator.replacePi(newPi,selectedPi);
@@ -634,14 +628,27 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     String text=textMatchlist.get(i).toLowerCase();
                     for(int j=0;j<commands.size();j++){
 
-                        if(text.contains(commands.get(j).getRoomName().toLowerCase())&&text.contains(commands.get(j).getUserName().toLowerCase())&&text.contains(commands.get(j).getCommandString().toLowerCase())){
-                            CommandResult=commands.get(j);
+                        Command cmd= commands.get(j);
+                        if(cmd.haveUserName()){
+                        if(text.contains(cmd.getRoomName().toLowerCase())&&text.contains(cmd.getUserName().toLowerCase())&&text.contains(cmd.getCommandString().toLowerCase())){
+                                CommandResult=cmd;
+                            }}
+                        else {
+                            if(text.contains(cmd.getRoomName().toLowerCase())&&text.contains(cmd.getCommandString().toLowerCase())){
+                                CommandResult=cmd;
+                            }
                         }
                     }
                     if(CommandResult!=null){
                         SendCommand();
                         isSpeechOnListening=false;
-                        commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getUserName()+" + "+CommandResult.getCommandString());
+                        if(CommandResult.haveUserName()){
+                            commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getUserName()+" + "+CommandResult.getCommandString());
+                        }
+                        else {
+                            commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getCommandString());
+                        }
+
                         final Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
                             @Override

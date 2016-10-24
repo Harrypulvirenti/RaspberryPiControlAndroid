@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -42,39 +44,47 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     private int MyPi;
     private SwipeRefreshLayout refreshLayout;
-    private RecyclerView roomRecyclerView;
+    private static RecyclerView roomRecyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private RoomAdapter adapter;
     private TextView tvEmptyRoom;
-    private FloatingActionButton fabAddRoom;
+    private static FloatingActionButton fabAddRoom;
     private final static int REQUEST_ADD_ROOM=21423;
     private final static String KEY_ROOM="myRoom";
-    private TextView tvOffline;
+    private static TextView tvOffline;
     private View snackView;
+    private TextView tvNoRaspberry;
+
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.pi_room_fragment,container,false);
+        View v = inflater.inflate(R.layout.pi_room_fragment, container, false);
 
-        Bundle extra=getArguments();
+        Bundle extra = getArguments();
 
-       refreshLayout= (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayout);
-       refreshLayout.setOnRefreshListener(this);
+        refreshLayout = (SwipeRefreshLayout) v.findViewById(R.id.swipeRefreshLayout);
+        refreshLayout.setOnRefreshListener(this);
 
 
-        roomRecyclerView= (RecyclerView) v.findViewById(R.id.recyclerRoomList);
+        roomRecyclerView = (RecyclerView) v.findViewById(R.id.recyclerRoomList);
         roomRecyclerView.setHasFixedSize(true);
 
-        tvOffline= (TextView) v.findViewById(R.id.tvRaspberryOffline);
+        tvOffline = (TextView) v.findViewById(R.id.tvRaspberryOffline);
+        tvNoRaspberry = (TextView) v.findViewById(R.id.tvNoRaspberry);
+        fabAddRoom = (FloatingActionButton) v.findViewById(R.id.fabAddRoom);
+        fabAddRoom.setOnClickListener(this);
 
-        if(extra!=null){
+        if (extra != null) {
 
-            MyPi=extra.getInt(KEY_PI);
+            MyPi = extra.getInt(KEY_PI);
 
         }
 
-        if(!ActivityCoordinator.initRoomList(MyPi)){
+        if(MyPi>-1){
+
+        if (!ActivityCoordinator.initRoomList(MyPi)) {
             roomRecyclerView.setVisibility(View.GONE);
             tvOffline.setVisibility(View.VISIBLE);
         }
@@ -98,17 +108,35 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
         roomRecyclerView.setAdapter(adapter);
 
 
-        tvEmptyRoom=(TextView)v.findViewById(R.id.tvEmptyRom);
+        tvEmptyRoom = (TextView) v.findViewById(R.id.tvEmptyRom);
 
-        if(ActivityCoordinator.getRoomListSize(MyPi)==0&&tvOffline.getVisibility()==View.GONE) {
+        if (ActivityCoordinator.getRoomListSize(MyPi) == 0 && tvOffline.getVisibility() == View.GONE) {
             roomRecyclerView.setVisibility(View.GONE);
             tvEmptyRoom.setVisibility(View.VISIBLE);
         }
 
-        fabAddRoom=(FloatingActionButton) v.findViewById(R.id.fabAddRoom);
-        fabAddRoom.setOnClickListener(this);
+
+    }else {
+            roomRecyclerView.setVisibility(View.GONE);
+            fabAddRoom.setVisibility(View.GONE);
+            tvNoRaspberry.setVisibility(View.VISIBLE);
+
+        }
 
         return v;
+    }
+
+    public static boolean piIsOnline(){
+        if(tvOffline.getVisibility()==View.VISIBLE)
+            return false;
+        else
+            return true;
+    }
+
+    public static void comunicatePiOffline(){
+        roomRecyclerView.setVisibility(View.GONE);
+        tvOffline.setVisibility(View.VISIBLE);
+        fabAddRoom.setVisibility(View.GONE);
     }
 
     private int dpToPx(int dp) {
@@ -122,29 +150,40 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
     @Override
     public void onRefresh() {
-        ArrayList<XMLRoom> list=ActivityCoordinator.updateRoomList(MyPi);
+        if(isOnline()) {
+            ArrayList<XMLRoom> list = ActivityCoordinator.updateRoomList(MyPi);
 
-            if(list!=null){
+            if (list != null) {
 
-                if(list.size()>0) {
+                if (list.size() > 0) {
 
                     adapter.setMyData(list);
                     adapter.notifyDataSetChanged();
                     roomRecyclerView.setVisibility(View.VISIBLE);
+                    fabAddRoom.setVisibility(View.VISIBLE);
                     tvOffline.setVisibility(View.GONE);
                     tvEmptyRoom.setVisibility(View.GONE);
-                }else {
+                } else {
                     roomRecyclerView.setVisibility(View.GONE);
                     tvEmptyRoom.setVisibility(View.VISIBLE);
+                    fabAddRoom.setVisibility(View.GONE);
                     tvOffline.setVisibility(View.GONE);
+                    tvOffline.setText(getString(R.string.textRaspberryOffline));
                 }
-            }else{
+            } else {
                 roomRecyclerView.setVisibility(View.GONE);
+                fabAddRoom.setVisibility(View.GONE);
                 tvOffline.setVisibility(View.VISIBLE);
             }
-        refreshLayout.setRefreshing(false);
+            refreshLayout.setRefreshing(false);
 
-
+        }else {
+            refreshLayout.setRefreshing(false);
+            tvOffline.setText(getString(R.string.errorOffline));
+            fabAddRoom.setVisibility(View.GONE);
+            roomRecyclerView.setVisibility(View.GONE);
+            tvOffline.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -153,17 +192,18 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
     public void onClick(View v) {
 
         if(v.getId()==R.id.fabAddRoom){
-
+            snackView=v;
             if(tvOffline.getVisibility()==View.GONE) {
                 Intent intent = new Intent(getActivity(), AddRoomActivity.class);
 
                 intent.putExtra(KEY_PI, MyPi);
 
                 startActivityForResult(intent, REQUEST_ADD_ROOM);
-            }else{
-                snackView=v;
-                showToastMessage(getString(R.string.textRaspberryOffline));
+            }else if(isOnline()){
 
+                showToastMessage(getString(R.string.textRaspberryOffline));
+            }else {
+                showToastMessage(getString(R.string.errorOffline));
             }
 
         }
@@ -279,7 +319,19 @@ public class PiRoomFragment extends Fragment implements SwipeRefreshLayout.OnRef
 
 
     void  showToastMessage(String message){
-        Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+        if(snackView!=null)
+          Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
+
+    private boolean isOnline(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
+    }
+
 
 }

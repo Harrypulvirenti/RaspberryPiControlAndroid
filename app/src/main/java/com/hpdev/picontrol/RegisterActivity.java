@@ -30,18 +30,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
     private EditText etPassword;
     private EditText etSecondPassword;
     private TextView errorText;
-    private boolean error=false;
-    private final String REGISTER_URL="http://harrydev.altervista.org/Tesi/registerUser.php";
-    private final String CHECK_EMAIL_URL="http://harrydev.altervista.org/Tesi/checkEmail.php";
-    private final String KEY_NAME="name";
-    private final String KEY_SURNAME="surname";
-    private final String KEY_EMAIL="email";
-    private final String KEY_PASSWORD="password";
+    private boolean error = false;
+    private final String REGISTER_URL = "http://harrydev.altervista.org/Tesi/registerUser.php";
+    private final String CHECK_EMAIL_URL = "http://harrydev.altervista.org/Tesi/checkEmail.php";
+    private final String KEY_NAME = "name";
+    private final String KEY_SURNAME = "surname";
+    private final String KEY_EMAIL = "email";
+    private final String KEY_PASSWORD = "password";
     private View snackView;
-    private final int SERVER_ERROR=-1;
-    private final int SERVER_SUCCESS=1;
-    private final int EMAIL_VALID=0;
-    private boolean emailValid=false;
+    private final int SERVER_ERROR = -1;
+    private final int SERVER_SUCCESS = 1;
+    private final int EMAIL_VALID = 0;
+    private boolean emailValid = false;
 
 
     @Override
@@ -55,18 +55,18 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                snackView=view;
-                String myString=etSecondPassword.getText().toString();
-                String firstPassword=etPassword.getText().toString();
-                if(!myString.equals(firstPassword)) {
+                snackView = view;
+                String myString = etSecondPassword.getText().toString();
+                String firstPassword = etPassword.getText().toString();
+                if (!myString.equals(firstPassword)) {
                     errorText.setText(getString(R.string.error_incorrect_password));
-                    error=true;
-                } else{
+                    error = true;
+                } else {
                     etSecondPassword.setText(myString.trim());
                     errorText.setText("");
-                    error=false;
+                    error = false;
                 }
-                if(!error){
+                if (!error) {
                     registerUser();
                 }
             }
@@ -74,24 +74,22 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        etName= (EditText) findViewById(R.id.addName);
-        etSurname= (EditText) findViewById(R.id.addSurname);
-        etEmail= (EditText) findViewById(R.id.addEmail);
-        etPassword= (EditText) findViewById(R.id.addPass);
-        etSecondPassword= (EditText) findViewById(R.id.addPassSecond);
+        etName = (EditText) findViewById(R.id.addName);
+        etSurname = (EditText) findViewById(R.id.addSurname);
+        etEmail = (EditText) findViewById(R.id.addEmail);
+        etPassword = (EditText) findViewById(R.id.addPass);
+        etSecondPassword = (EditText) findViewById(R.id.addPassSecond);
         etName.setOnFocusChangeListener(this);
         etSurname.setOnFocusChangeListener(this);
         etEmail.setOnFocusChangeListener(this);
         etSecondPassword.setOnFocusChangeListener(this);
         etPassword.setOnFocusChangeListener(this);
-        errorText= (TextView) findViewById(R.id.registerError);
+        errorText = (TextView) findViewById(R.id.registerError);
 
 
     }
 
-    private void registerUser(){
-
-
+    private void registerUser() {
 
 
         final String name = etName.getText().toString();
@@ -104,9 +102,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if(Integer.parseInt(response)==SERVER_SUCCESS){
+                        if (Integer.parseInt(response) == SERVER_SUCCESS) {
                             closeActivity();
-                        }else{
+                        } else {
                             showToastMessage(getString(R.string.server_error));
                         }
 
@@ -117,13 +115,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                     public void onErrorResponse(VolleyError error) {
                         showToastMessage(getString(R.string.server_error));
                     }
-                }){
+                }) {
             @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<String, String>();
-                params.put(KEY_NAME,name);
-                params.put(KEY_SURNAME,surname);
-                params.put(KEY_PASSWORD,password);
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put(KEY_NAME, name);
+                params.put(KEY_SURNAME, surname);
+                params.put(KEY_PASSWORD, password);
                 params.put(KEY_EMAIL, email);
                 return params;
             }
@@ -138,7 +136,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
         showToastMessage(getString(R.string.registration_success));
         Intent resultIntent = new Intent();
         resultIntent.putExtra(KEY_EMAIL, etEmail.getText().toString());
-        setResult(Activity.RESULT_OK,resultIntent);
+        setResult(Activity.RESULT_OK, resultIntent);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -149,19 +147,19 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
 
     }
 
-    private void requestCheckEmail(final String email){
+    private void requestCheckEmail(final String email) {
 
         StringRequest stringRequest = new StringRequest(Request.Method.POST, CHECK_EMAIL_URL,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                       if(Integer.parseInt(response)==EMAIL_VALID){
-                           checkEmail(true);
+                        if (Integer.parseInt(response) == EMAIL_VALID) {
+                            checkEmail(true);
 
-                       }else{
-                           checkEmail(false);
+                        } else {
+                            checkEmail(false);
 
-                       }
+                        }
 
                     }
                 },
@@ -171,10 +169,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
                         //checkEmail(false);
 
                     }
-                }){
+                }) {
             @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<String, String>();
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
                 params.put(KEY_EMAIL, email);
                 return params;
             }
@@ -188,12 +186,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
     }
 
     private void checkEmail(boolean b) {
-        emailValid=b;
-        if(!b){
-            error=true;
+        emailValid = b;
+        if (!b) {
+            error = true;
             errorText.setText(getString(R.string.error_email_used));
-        }else{
-            error=false;
+        } else {
+            error = false;
             errorText.setText("");
 
         }
@@ -202,97 +200,91 @@ public class RegisterActivity extends AppCompatActivity implements View.OnFocusC
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
-        if(v.getId()==R.id.addName&&!hasFocus){
-
-            String myString=etName.getText().toString();
-            if(myString.length()>0){
-                String upperString = myString.substring(0,1).toUpperCase() + myString.substring(1);
+        if (v.getId() == R.id.addName && !hasFocus) {
+            String myString = etName.getText().toString();
+            if (myString.length() > 0) {
+                String upperString = myString.substring(0, 1).toUpperCase() + myString.substring(1);
                 etName.setText(upperString.trim());
                 errorText.setText("");
-                error=false;
-            } else{
+                error = false;
+            } else {
                 errorText.setText(getString(R.string.error_field_required));
-                error=true;
+                error = true;
             }
-
         }
 
-        if(v.getId()==R.id.addSurname&&!hasFocus){
-
-            String myString=etSurname.getText().toString();
-            if(myString.length()>0){
-                String upperString = myString.substring(0,1).toUpperCase() + myString.substring(1);
+        if (v.getId() == R.id.addSurname && !hasFocus) {
+            String myString = etSurname.getText().toString();
+            if (myString.length() > 0) {
+                String upperString = myString.substring(0, 1).toUpperCase() + myString.substring(1);
                 etSurname.setText(upperString.trim());
                 errorText.setText("");
-                error=false;
-            } else{
+                error = false;
+            } else {
                 errorText.setText(getString(R.string.error_field_required));
-                error=true;
+                error = true;
             }
-
         }
 
-        if(v.getId()==R.id.addEmail&&!hasFocus){
-            String k=etEmail.getText().toString();
-            String myString=k.replaceAll(" ", "");
-
-            if (myString.length()==0) {
+        if (v.getId() == R.id.addEmail && !hasFocus) {
+            String k = etEmail.getText().toString();
+            String myString = k.replaceAll(" ", "");
+            if (myString.length() == 0) {
                 errorText.setText(getString(R.string.error_field_required));
-                error=true;
-
-            } else if(!android.util.Patterns.EMAIL_ADDRESS.matcher(myString).matches()) {
+                error = true;
+            } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(myString).matches()) {
                 errorText.setText(getString(R.string.error_invalid_email));
-                error=true;
-            } else{
+                error = true;
+            } else {
                 errorText.setText("");
                 etEmail.setText(myString);
-                error=false;
+                error = false;
                 requestCheckEmail(myString);
-            }}
+            }
+        }
 
-        if(v.getId()==R.id.addPass&&!hasFocus){
+        if (v.getId() == R.id.addPass && !hasFocus) {
 
-            String myString=etPassword.getText().toString();
-            if (myString.length()==0) {
+            String myString = etPassword.getText().toString();
+            if (myString.length() == 0) {
                 errorText.setText(getString(R.string.error_field_required));
-                error=true;
+                error = true;
 
-            } else if(myString.length()<5) {
+            } else if (myString.length() < 5) {
                 errorText.setText(getString(R.string.error_invalid_password));
-                error=true;
-            } else{
+                error = true;
+            } else {
                 etPassword.setText(myString.trim());
                 errorText.setText("");
-                error=false;
+                error = false;
             }
 
         }
 
-        if(v.getId()==R.id.addPassSecond&&!hasFocus){
+        if (v.getId() == R.id.addPassSecond && !hasFocus) {
 
-            String myString=etSecondPassword.getText().toString();
-            String firstPassword=etPassword.getText().toString();
-            if (myString.length()==0) {
+            String myString = etSecondPassword.getText().toString();
+            String firstPassword = etPassword.getText().toString();
+            if (myString.length() == 0) {
                 errorText.setText(getString(R.string.error_incorrect_password));
-                error=true;
+                error = true;
 
-            } else if(!myString.equals(firstPassword)) {
+            } else if (!myString.equals(firstPassword)) {
                 errorText.setText(getString(R.string.error_incorrect_password));
-                error=true;
-            } else{
+                error = true;
+            } else {
                 etSecondPassword.setText(myString.trim());
                 errorText.setText("");
-                error=false;
+                error = false;
             }
 
         }
-
 
 
     }
 
 
-    void  showToastMessage(String message){
+    void showToastMessage(String message) {
         Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
 

@@ -1,7 +1,10 @@
 package com.hpdev.picontrol;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -65,8 +68,10 @@ public class AddPiActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         snackView=v;
-
-        isPiOnline();
+        if(isOnline())
+            isPiOnline();
+        else
+            showToastMessage(getString(R.string.errorOffline));
 
     }
 
@@ -142,6 +147,17 @@ public class AddPiActivity extends AppCompatActivity implements View.OnClickList
 
 
     void  showToastMessage(String message){
-        Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+        if(snackView!=null)
+             Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    private boolean isOnline(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }

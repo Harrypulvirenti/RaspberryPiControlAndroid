@@ -1,10 +1,11 @@
 package com.hpdev.picontrol;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -15,7 +16,6 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -39,6 +39,7 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
     private final static String KEY_PI="MyPi";
     private static final String KEY_ROOM_POS="Room_Pos";
     private final static String KEY_ROOM="myRoom";
+    private static final String KEY_USER="myUser";
 
     private View snackView;
 
@@ -68,7 +69,7 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
         roomName=intent.getStringExtra(KEY_ROOM);
         MyPi = intent.getIntExtra(KEY_PI,0);
         MyRoom=intent.getIntExtra(KEY_ROOM_POS,0);
-        userList=ActivityCoordinator.getRoomUserList(MyPi,MyRoom);
+        userList=ActivityCoordinator.getRoomUserStringArray(MyPi,MyRoom);
 
 
         layoutManager = new GridLayoutManager(this, 2);
@@ -93,6 +94,7 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
 
         if (v.getId() == R.id.fabDoneAddOn) {
             snackView = v;
+            if(isOnline()){
             String myString = etUserName.getText().toString().trim();
 
             if (myString.length() > 0) {
@@ -112,6 +114,8 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
             } else {
                 showToastMessage(getString(R.string.noUserName));
 
+            }}else {
+                showToastMessage(getString(R.string.errorOffline));
             }
         }
 
@@ -135,9 +139,10 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
 
                 ActivityCoordinator.addUserToRoom(new XMLUser(UserName,adapter.getSelected(),xmlPins),MyPi,MyRoom);
 
-                //Intent data = new Intent();
-                //data.putExtra(KEY_ROOM, roomName);
-                //setResult(Activity.RESULT_OK, data);
+                Intent data = new Intent();
+                data.putExtra(KEY_ROOM, roomName);
+                data.putExtra(KEY_USER,userList.length);
+                setResult(RESULT_OK, data);
 
                 final Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -166,11 +171,7 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
            return true;
        }
 
-
-
         return super.onOptionsItemSelected(item);
-
-
     }
 
     public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
@@ -234,7 +235,8 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
 
 
     void showToastMessage(String message) {
-        Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+        if(snackView!=null)
+             Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
 
     private class TypeUserAdapter extends RecyclerView.Adapter<AddUserActivity.TypeUserAdapter.ViewHolder> {
@@ -350,5 +352,17 @@ public class AddUserActivity extends AppCompatActivity implements View.OnClickLi
         public boolean isSelected(){
             return Selected;
         }
+    }
+
+
+
+    private boolean isOnline(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 }

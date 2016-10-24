@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.hpdev.picontrol.AddUserActivity">
+    tools:context="com.hpdev.picontrol.ViewUserActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -21,78 +21,63 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
-
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="@dimen/toolbar"
+        android:fillViewport="true">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginBottom="90dp"
-        android:layout_marginTop="@dimen/toolbar"
-        android:descendantFocusability="beforeDescendants"
-        android:focusableInTouchMode="true">
-
+        android:layout_height="wrap_content"
+        android:id="@+id/rlUserView"
+        >
 
         <TextView
-            android:id="@+id/tvAddUser"
+            android:id="@+id/tvUserCommand"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
             android:layout_margin="10dp"
             android:gravity="center"
-            android:text="@string/textAddUser"
+            android:text="@string/text_user_command"
             android:textColor="@color/primary_text"
             android:textSize="20dp"
             android:textStyle="bold" />
-
-        <android.support.design.widget.TextInputLayout
-            android:id="@+id/inputaddUserName"
+        <TextView
+            android:id="@+id/tvCommandList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tvAddUser"
-            android:layout_gravity="center"
-            android:layout_margin="5dp">
-
-            <EditText
-                android:id="@+id/addUserName"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/prompt_addUserName"
-                android:inputType="textEmailAddress"
-                android:maxLines="1"
-                android:singleLine="true" />
-
-        </android.support.design.widget.TextInputLayout>
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:layout_below="@id/tvUserCommand"
+            android:textColor="@color/primary_text"
+            android:textSize="20dp"
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvUserType"
+            android:id="@+id/tvPinList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/inputaddUserName"
-            android:layout_margin="5dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
-            android:text="@string/textUserType"
+            android:text="@string/text_pin_used"
+            android:layout_below="@id/tvCommandList"
             android:textColor="@color/primary_text"
             android:textSize="20dp"
             android:textStyle="bold" />
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerTypeUser"
+
+
+        <ImageView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/tvUserType"
-            android:scrollbars="vertical" />
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvPinList"
+            app:srcCompat="@drawable/img_gpio_base"
+            android:layout_centerHorizontal="true"
+            android:id="@+id/imgGpio_Base" />
 
     </RelativeLayout>
-
-
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fabDoneAddOn"
-        android:layout_width="@dimen/fab_Dimension"
-        android:layout_height="@dimen/fab_Dimension"
-        android:layout_gravity="bottom|center"
-        android:layout_marginBottom="10dp"
-        app:srcCompat="@drawable/ic_done" />
+    </ScrollView>
 
 </android.support.design.widget.CoordinatorLayout>

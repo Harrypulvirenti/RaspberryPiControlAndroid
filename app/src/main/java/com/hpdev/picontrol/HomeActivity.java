@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -74,7 +76,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     private TextView drawerUsername;
     private int userID;
     private final String USER_DATA_URL="http://harrydev.altervista.org/Tesi/getUserData.php";
-    private final String GET_IP_URL="http://harrydev.altervista.org/Tesi/getIP.php";
     private final String KEY_PI_ID="pi_id";
     private final String KEY_PI_NAME="pi_name";
     private final String KEY_PI_IP="pi_ip";
@@ -98,8 +99,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ActivityCoordinator.initIstance(getResources(),this);
         userID=getIntent().getIntExtra(KEY_USERID,0);
+        ActivityCoordinator.initIstance(getResources(),this,userID);
         requestUserData(userID);
 
 
@@ -127,7 +128,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         drawerEmail=(TextView)headerView.findViewById(R.id.drawerEmail);
         drawerUsername=(TextView)headerView.findViewById(R.id.drawerUsername);
         PiList=ActivityCoordinator.getPiList();
-
 
         drawerLayout = (DrawerLayout) findViewById(R.id.drawer);
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this,drawerLayout,toolbar,R.string.openDrawer, R.string.closeDrawer){
@@ -189,8 +189,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         updateDrawer(username,email);
                         if(PiList.size()>0){
                             selectedPi=0;
-                            selectFragment(selectedPi);
                         }
+                        selectFragment(selectedPi);
 
                     }
                 },
@@ -257,11 +257,30 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if(v.getId()==R.id.fabStartListening&&!speakIsOpen){
             snackView=v;
-            CheckIP(ActivityCoordinator.getPi(selectedPi));
+
+            if(PiRoomFragment.piIsOnline()){
+                if(isOnline()){
+                    if(selectedPi>-1){
+                        ActivityCoordinator.CheckIP(selectedPi);
+                        StartVoiceRecognition();
+                        showSpeakCard();
+                    }else {
+                        showToastMessage(getString(R.string.title_activity_add_pi));
+                    }
+                } else {
+                    showToastMessage(getString(R.string.errorOffline));
+                }
+            }else if(isOnline()){
+                showToastMessage(getString(R.string.textRaspberryOffline));
+            }else {
+                showToastMessage(getString(R.string.errorOffline));
+            }
+
+
+        } else if(v.getId()==R.id.fabStartListening&&speakIsOpen&&!isSpeechOnListening&&CommandResult==null&&isOnline()){
             StartVoiceRecognition();
-            showSpeakCard();
-        } else if(v.getId()==R.id.fabStartListening&&speakIsOpen&&!isSpeechOnListening&&CommandResult==null){
-            StartVoiceRecognition();
+        }else {
+            showToastMessage(getString(R.string.errorOffline));
         }
         if(v.getId()==R.id.hide_button){
             speechReco.stopListening();
@@ -398,6 +417,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         if(requestCode==requestAddPi&&resultCode== Activity.RESULT_OK){
 
             addDrawerPi(data.getStringExtra(newPiKEY));
+            selectedPi=PiList.size()-1;
+            selectFragment(selectedPi);
 
         }
 
@@ -468,71 +489,13 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
 
     void  showToastMessage(String message){
-        Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+        if(snackView!=null)
+             Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
 
-    private void CheckIP(Pi pi) {
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date strDate=null;
-        try {
-            strDate = sdf.parse(pi.getPiLastUpdate());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        Long ts = System.currentTimeMillis();
-
-
-        int validity= Res.getInteger(R.integer.IPValidity);
 
 
 
-        if(strDate!=null&&(ts-strDate.getTime())>validity){
-           requestIPUpdate(userID,pi);
-
-        }
-
-    }
-
-    private void requestIPUpdate(final int id,final Pi pi) {
-
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, GET_IP_URL,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        if(!response.equals("error")){
-                            Pi newPi=ActivityCoordinator.getPi(selectedPi);
-                            newPi.setPiIP(response);
-                            //ActivityCoordinator.replacePi(newPi,selectedPi);
-
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-
-                        showToastMessage(getString(R.string.server_error));
-                    }
-                }){
-            @Override
-            protected Map<String,String> getParams(){
-                Map<String,String> params = new HashMap<String, String>();
-                params.put(KEY_USERID, String.valueOf(id));
-                params.put(KEY_PI_ID,pi.getPiID());
-                return params;
-            }
-
-        };
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
-
-
-
-    }
 
 
 
@@ -640,8 +603,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                     if(CommandResult!=null){
-                        SendCommand();
-                        isSpeechOnListening=false;
                         if(CommandResult.haveUserName()){
                             commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getUserName()+" + "+CommandResult.getCommandString());
                         }
@@ -649,13 +610,21 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                             commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getCommandString());
                         }
 
+
+                        SendCommand();
+
+
+                        isSpeechOnListening=false;
+
+                    if(speakIsOpen){
                         final Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {
                             @Override
                             public void run() {
                                 hideButton();
                             }
-                        }, 1500);
+                        }, 1500);}
+
                         break;}
                 }
             } else{
@@ -703,13 +672,32 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
     private void handleServerResult(String resp) {
 
+       if(!resp.equals(RaspberryTCPClient.ERROR)){
         String[] parts = resp.split("-");
         String[] type=getResources().getStringArray(R.array.userTypeName);
 
 
         if(parts[0].equals(type[1])){
-            startTTS(getString(R.string.ttsDHT11_First)+parts[1]+getString(R.string.ttsDHT11_Second)+parts[2]+"%");
-        }
+            if(parts.length>2){
+                startTTS(getString(R.string.ttsDHT11_First)+parts[1]+getString(R.string.ttsDHT11_Second)+parts[2]+"%");
+            }else{
+                commandResultText.setText(getString(R.string.sensor_error));
+            }
+
+        }}else {
+           speakIsOpen=false;
+           hideButton();
+           PiRoomFragment.comunicatePiOffline();
+
+               final Handler handler = new Handler();
+               handler.postDelayed(new Runnable() {
+                   @Override
+                   public void run() {
+                       showToastMessage(getString(R.string.errorPiDown));
+                   }
+               }, 400);
+
+       }
 
 
     }
@@ -719,6 +707,16 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         speechReco.destroy();
+    }
+
+    private boolean isOnline(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
 

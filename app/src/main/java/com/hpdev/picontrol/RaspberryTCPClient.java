@@ -26,6 +26,7 @@ public class RaspberryTCPClient extends AsyncTask {
     public static final String OPERATION_DONE="done";
     public static final String OPERATION_FAIL="fail";
     public static final String OPERATION_FAIL_NO_PIN="noPin";
+    public static final String ERROR="error";
 
     private String pi_ip;
     private Resources Res;
@@ -74,6 +75,9 @@ public class RaspberryTCPClient extends AsyncTask {
         Socket clientSocket = null;
         DataOutputStream outToServer = null;
         BufferedReader inFromServer = null;
+
+        Object Ret=ERROR;
+
         try {
             clientSocket = new Socket(this.pi_ip, Res.getInteger(R.integer.PortNumber));
             outToServer = new DataOutputStream(clientSocket.getOutputStream());
@@ -90,10 +94,10 @@ public class RaspberryTCPClient extends AsyncTask {
                     serverResp = inFromServer.readLine();
                     if(serverResp.equals(DONE_MESSAGE)){
                         clientSocket.close();
-                        return OPERATION_DONE;
+                        Ret= OPERATION_DONE;
                     }else{
                         clientSocket.close();
-                        return OPERATION_FAIL;
+                        Ret= OPERATION_FAIL;
                     }
                 }
 
@@ -118,7 +122,7 @@ public class RaspberryTCPClient extends AsyncTask {
                     }
                 }
                 clientSocket.close();
-                return xml;
+                Ret= xml;
 
             }
 
@@ -140,14 +144,14 @@ public class RaspberryTCPClient extends AsyncTask {
                                 users.add(new XMLPin(Integer.parseInt(serverResp),UserName,Integer.parseInt(UserType)));
                             }else{
                                 clientSocket.close();
-                                return users;
+                                Ret= users;
                             }
 
                         }
 
                     }else{
                         clientSocket.close();
-                        return OPERATION_FAIL_NO_PIN;
+                        Ret= OPERATION_FAIL_NO_PIN;
                     }
                 }
             }
@@ -166,16 +170,17 @@ public class RaspberryTCPClient extends AsyncTask {
                     serverResp = inFromServer.readLine();
                     if(serverResp.equals(DONE_MESSAGE)){
                         clientSocket.close();
-                        return resp;
+                        Ret= resp;
                     }else{
                         clientSocket.close();
-                        return OPERATION_FAIL;
+                        Ret= OPERATION_FAIL;
                     }
 
 
                 }else{
                     clientSocket.close();
-                    return OPERATION_FAIL;
+
+                    Ret= OPERATION_FAIL;
                 }
 
 
@@ -184,9 +189,11 @@ public class RaspberryTCPClient extends AsyncTask {
 
 
         } catch (IOException e) {
-            return null;
+
+        }finally {
+            return Ret;
         }
 
-        return null;
+
     }
 }

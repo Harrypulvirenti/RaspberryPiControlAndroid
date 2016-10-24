@@ -54,9 +54,10 @@
     <string name="drawerSettings">Impostazioni</string>
     <string name="drawerLogout">Logout</string>
     <string name="drawerAddPi">Aggiungi Raspberry</string>
-    <string name="title_activity_add_pi">Aggiungi un Raspberry</string>
+    <string name="title_activity_add_pi">Aggiungi un Raspberry Pi</string>
+    <string name="text_no_raspberry">Aggiungere un Raspberry Pi</string>
 
-    <string name="text_addPi_1">Avvia il Jar di PiControl su Raspberry Pi\ntramite il seguente comando:\n\n\"sudo java -jar PiControl.jar LOGIN_KEY\"\n\nLa tua LOGIN_KEY:</string>
+    <string name="text_addPi_1">Esegui il primo avvio di PiControl su Raspberry Pi\ntramite il seguente comando:\n\n\"sudo java -jar PiControl.jar LOGIN_KEY\"\n\nLa tua LOGIN_KEY:</string>
     <string name="text_addPi_2">Una volta avviato il Jar clicca sul pulsante di conferma per l\'accoppiamento dei dispositivi.</string>
     <string name="addPi_Error">Errore nella connessione col Raspberry.\nRiprovare.</string>
     <string name="prompt_piName">Nome Raspberry</string>
@@ -91,7 +92,6 @@
     <string name="textUserType">Add On Disponibili</string>
 
 
-
     <string name="noUserName">Aggiungere un nome all\'Add On per Proseguire.</string>
     <string name="UserAdded">Add On aggiunto con successo.</string>
     <string name="userNamePresent">Nome Add On già in uso per questa stanza.</string>
@@ -101,11 +101,32 @@
 
 
     <string-array name="userTypeName">
-    <item>Relay</item>
-    <item>DHT11</item>
-</string-array>
+        <item>Relay</item>
+        <item>DHT11</item>
+    </string-array>
 
-<string name="ttsDHT11_First">C\'è una temperatura di </string>
+    <string name="ttsDHT11_First">C\'è una temperatura di </string>
     <string name="ttsDHT11_Second">gradi ed un\'umidità relativa del </string>
+
+    <string name="text_Room_User">Gli Add On inseriti:</string>
+    <string name="sensor_error">Errore con l\'Add On. Controllarne il funzionamento.</string>
+    <string name="title_activity_view_user">ViewUserActivity</string>
+    <string name="errorPiDown">Errore di connessione.</string>
+    <string name="errorOffline">Lo Smartphone è Offline.</string>
+    <string name="text_user_command">Il tuo comando deve contenere le seguenti parole per essere riconosciuto:</string>
+    <string name="text_pin_used">I Pin GPIO da usare:</string>
+
+    <string-array name="command_array_relay">
+        <item>Accendi</item>
+        <item>Spegni</item>
+        <item>Accendi Normalmente Chiuso</item>
+        <item>Spegni Normalmente Chiuso</item>
+    </string-array>
+
+    <string-array name="command_array_dht11">
+        <item>Temperatura</item>
+        <item>Umidità</item>
+        <item>Caldo</item>
+    </string-array>
 
 </resources>

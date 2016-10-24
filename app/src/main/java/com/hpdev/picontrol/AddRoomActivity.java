@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -157,13 +159,15 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
 
 
     void showToastMessage(String message) {
-        Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
+        if(snackView!=null)
+            Snackbar.make(snackView, message, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.doneAddRoom) {
             snackView = v;
+            if(isOnline()){
             String myString = etRoomName.getText().toString().trim();
 
             if (myString.length() > 0) {
@@ -183,6 +187,8 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
             } else {
                 showToastMessage(getString(R.string.noNameRoom));
 
+            }}else {
+                showToastMessage(getString(R.string.errorOffline));
             }
         }
     }
@@ -334,6 +340,17 @@ public class AddRoomActivity extends AppCompatActivity implements View.OnClickLi
         public boolean isSelected(){
             return Selected;
         }
+    }
+
+
+    private boolean isOnline(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
 }

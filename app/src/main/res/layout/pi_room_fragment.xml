@@ -47,6 +47,20 @@
         android:id="@+id/tvRaspberryOffline"
         />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textColor="@color/primary_text"
+        android:text="@string/text_no_raspberry"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:gravity="center"
+        android:id="@+id/tvNoRaspberry"
+        />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fabAddRoom"
         android:layout_width="@dimen/fab_Dimension"

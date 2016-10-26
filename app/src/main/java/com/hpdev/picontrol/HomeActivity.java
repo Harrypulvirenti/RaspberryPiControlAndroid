@@ -279,7 +279,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         } else if(v.getId()==R.id.fabStartListening&&speakIsOpen&&!isSpeechOnListening&&CommandResult==null&&isOnline()){
             StartVoiceRecognition();
-        }else {
+        }else if(!isOnline()&&v.getId()==R.id.fabStartListening) {
             showToastMessage(getString(R.string.errorOffline));
         }
         if(v.getId()==R.id.hide_button){
@@ -438,7 +438,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             String piIP=obj.getString(KEY_PI_IP);
             String piLastUpdate=obj.getString(KEY_PI_LAST_UPDATE);
             Pi pi=new Pi(piID,piName,piIP,piLastUpdate);
-           // ActivityCoordinator.addPi(pi);
+            ActivityCoordinator.addPi(pi);
             PiList.add(pi);
 
         } catch (JSONException e) {
@@ -568,7 +568,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 default:
 
-                    Log.d("hereeeeeeeeeee",  "error " +  error);
+                    Log.e("RecognitionListener",  "Error: " +  error);
                     break;
             }
             isSpeechOnListening=false;
@@ -576,21 +576,14 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onResults(Bundle results) {
-
             ArrayList<Command> commands=ActivityCoordinator.getCommandList();
-
             ArrayList<String> textMatchlist = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-
             CommandResult=null;
-
-
             if(commands.size()>0){
             if (!textMatchlist.isEmpty()){
-
                 for(int i=0;textMatchlist.size()>i;i++){
                     String text=textMatchlist.get(i).toLowerCase();
                     for(int j=0;j<commands.size();j++){
-
                         Command cmd= commands.get(j);
                         if(cmd.haveUserName()){
                         if(text.contains(cmd.getRoomName().toLowerCase())&&text.contains(cmd.getUserName().toLowerCase())&&text.contains(cmd.getCommandString().toLowerCase())){
@@ -609,13 +602,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                         else {
                             commandResultText.setText(CommandResult.getRoomName()+" + "+CommandResult.getCommandString());
                         }
-
-
                         SendCommand();
-
-
                         isSpeechOnListening=false;
-
                     if(speakIsOpen){
                         final Handler handler = new Handler();
                         handler.postDelayed(new Runnable() {

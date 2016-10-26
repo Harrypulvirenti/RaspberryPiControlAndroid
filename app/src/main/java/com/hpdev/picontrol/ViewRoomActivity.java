@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -44,6 +45,8 @@ public class ViewRoomActivity extends AppCompatActivity implements View.OnClickL
     private GridLayoutManager layoutManager;
     private TypeUserAdapter adapter;
     private ArrayList<XMLUser> userList;
+    private RelativeLayout rlUserView;
+    private TextView tvNoUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,14 +64,14 @@ public class ViewRoomActivity extends AppCompatActivity implements View.OnClickL
 
         fabAddUser = (FloatingActionButton) findViewById(R.id.fabAddUser);
         fabAddUser.setOnClickListener(this);
+        tvNoUser=(TextView)findViewById(R.id.tvNoUser);
+        rlUserView=(RelativeLayout)findViewById(R.id.rlUserView);
 
 
         roomName=intent.getStringExtra(KEY_ROOM);
         MyPi = intent.getIntExtra(KEY_PI,0);
         MyRoom=intent.getIntExtra(KEY_ROOM_POS,0);
         userList=ActivityCoordinator.getRoomUserList(MyPi,MyRoom);
-
-
         layoutManager = new GridLayoutManager(this, 2);
 
 
@@ -81,9 +84,13 @@ public class ViewRoomActivity extends AppCompatActivity implements View.OnClickL
         typeUserRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // specify an adapter (see also next example)
-        adapter = new TypeUserAdapter(this,prepareAdapterData());
+        adapter = new TypeUserAdapter(this, prepareAdapterData());
         typeUserRecyclerView.setAdapter(adapter);
 
+        if(userList.size()==0) {
+            rlUserView.setVisibility(View.GONE);
+            tvNoUser.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -99,6 +106,8 @@ public class ViewRoomActivity extends AppCompatActivity implements View.OnClickL
             intent.putExtra(KEY_USER,data.getIntExtra(KEY_USER,0));
             intent.putExtra(KEY_ROOM,roomName);
             startActivityForResult(intent,REQUEST_VIEW_USER);
+            tvNoUser.setVisibility(View.GONE);
+            rlUserView.setVisibility(View.VISIBLE);
             userList=ActivityCoordinator.getRoomUserList(MyPi,MyRoom);
             adapter.setMyData(prepareAdapterData());
             adapter.notifyDataSetChanged();

@@ -25,6 +25,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/rlUserView"
         android:layout_marginBottom="90dp"
         android:layout_marginTop="@dimen/toolbar"
         android:descendantFocusability="beforeDescendants"
@@ -53,6 +54,20 @@
             android:scrollbars="vertical" />
 
     </RelativeLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"
+        android:textColor="@color/primary_text"
+        android:text="@string/text_no_user"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:gravity="center"
+        android:id="@+id/tvNoUser"
+        />
 
 
 

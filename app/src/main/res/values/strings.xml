@@ -115,6 +115,7 @@
     <string name="errorOffline">Lo Smartphone è Offline.</string>
     <string name="text_user_command">Il tuo comando deve contenere le seguenti parole per essere riconosciuto:</string>
     <string name="text_pin_used">I Pin GPIO da usare:</string>
+    <string name="text_no_user">Non ci sono Add On inseriti</string>
 
     <string-array name="command_array_relay">
         <item>Accendi</item>
